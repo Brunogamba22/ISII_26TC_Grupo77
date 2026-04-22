@@ -1,25 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+// Importamos useState para manejar el estado del usuario logueado
+import { useState } from "react";
 
+// Importamos nuestros componentes
+import Login from "./components/Login";
+import SolicitudCambio from "./components/SolicitudCambio";
+
+// Componente principal de la app
 function App() {
+
+  // Estado para guardar el usuario logueado
+  const [usuario, setUsuario] = useState(null);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+
+      {/* Si NO hay usuario → mostramos login */}
+      {!usuario ? (
+
+        <Login onLogin={setUsuario} />
+
+      ) : (
+
+        // Si hay usuario → mostramos la pantalla principal
+        <SolicitudCambio />
+
+      )}
+
     </div>
   );
 }
 
+// Exportamos el componente
 export default App;
