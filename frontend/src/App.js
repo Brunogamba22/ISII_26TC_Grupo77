@@ -1,34 +1,75 @@
-// Importamos useState para manejar el estado del usuario logueado
 import { useState } from "react";
+import Login from "./Views/Login";
+import GuardiasAsignadas from "./Views/GuardiasAsignadas";
+import SolicitudCambio from "./Views/SolicitudCambio";
+import "./App.css";
 
-// Importamos nuestros componentes
-import Login from "./components/Login";
-import SolicitudCambio from "./components/SolicitudCambio";
-
-// Componente principal de la app
 function App() {
-
-  // Estado para guardar el usuario logueado
   const [usuario, setUsuario] = useState(null);
+  const [guardiaSeleccionada, setGuardiaSeleccionada] = useState(null);
+  const [vista, setVista] = useState("login"); // "login", "guardias", "solicitud"
+
+  const handleLogin = (user) => {
+    setUsuario(user);
+    setVista("guardias");
+  };
+
+  const handleLogout = () => {
+    setUsuario(null);
+    setGuardiaSeleccionada(null);
+    setVista("login");
+  };
+
+  const handleSeleccionarGuardia = (guardia) => {
+    if (guardia) {
+      setGuardiaSeleccionada(guardia);
+      setVista("solicitud");
+    } else {
+      // Si cancela selección, volver a la lista de guardias
+      setVista("guardias");
+      setGuardiaSeleccionada(null);
+    }
+  };
+
+  const handleCancelarSolicitud = () => {
+    setVista("guardias");
+    setGuardiaSeleccionada(null);
+  };
 
   return (
     <div>
-
-      {/* Si NO hay usuario → mostramos login */}
-      {!usuario ? (
-
-        <Login onLogin={setUsuario} />
-
-      ) : (
-
-        // Si hay usuario → mostramos la pantalla principal
-        <SolicitudCambio />
-
+      {vista === "login" && <Login onLogin={handleLogin} />}
+      
+      {vista === "guardias" && usuario && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+            <button className="logout-btn" onClick={handleLogout}>
+              Cerrar sesión ({usuario.nombre})
+            </button>
+          </div>
+          <GuardiasAsignadas 
+            usuario={usuario} 
+            onSeleccionarGuardia={handleSeleccionarGuardia} 
+          />
+        </>
       )}
-
+      
+      {vista === "solicitud" && usuario && guardiaSeleccionada && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+            <button className="logout-btn" onClick={handleLogout}>
+              Cerrar sesión ({usuario.nombre})
+            </button>
+          </div>
+          <SolicitudCambio 
+            usuario={usuario}
+            guardiaSeleccionada={guardiaSeleccionada}
+            onCancelar={handleCancelarSolicitud}
+          />
+        </>
+      )}
     </div>
   );
 }
 
-// Exportamos el componente
 export default App;

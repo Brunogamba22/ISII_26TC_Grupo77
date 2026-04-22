@@ -1,38 +1,182 @@
-.App {
-  text-align: center;
+/* Estilos generales – Sistema de Gestión de Guardias Médicas */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Roboto, sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+body {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  padding: 1rem;
+}
+
+.container {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+  border-radius: 24px;
+  box-shadow: 0 20px 35px rgba(2, 62, 84, 0.15);
+  padding: 2rem 2.5rem;
+  transition: all 0.2s ease;
+}
+
+h1, h2, h3 {
+  color: #0369a1;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.8rem;
+  border-bottom: 3px solid #38bdf8;
+  padding-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #0c4a6e;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border: 1.5px solid #bae6fd;
+  border-radius: 16px;
+  font-size: 1rem;
+  background-color: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);
+}
+
+button {
+  background-color: #0284c7;
   color: white;
+  border: none;
+  border-radius: 40px;
+  padding: 0.9rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2);
+  width: 100%;
+  margin-top: 0.5rem;
 }
 
-.App-link {
-  color: #61dafb;
+button:hover {
+  background-color: #0369a1;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px rgba(2, 132, 199, 0.25);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+button:disabled {
+  background-color: #94a3b8;
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #b91c1c;
+  background-color: #fee2e2;
+  padding: 0.8rem 1.2rem;
+  border-radius: 40px;
+  margin: 1rem 0;
+  font-weight: 500;
+  border-left: 5px solid #dc2626;
+}
+
+.success-message {
+  color: #065f46;
+  background-color: #d1fae5;
+  padding: 0.8rem 1.2rem;
+  border-radius: 40px;
+  margin: 1rem 0;
+  font-weight: 500;
+  border-left: 5px solid #10b981;
+}
+
+.card {
+  background: #f8fafc;
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border: 1px solid #e0f2fe;
+}
+
+.guardia-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 16px;
+  margin-bottom: 0.8rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.guardia-item:hover {
+  border-color: #0284c7;
+  background: #f0f9ff;
+}
+
+.guardia-item.seleccionada {
+  border: 2px solid #0284c7;
+  background: #e0f2fe;
+}
+
+.badge {
+  background-color: #38bdf8;
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.logout-btn {
+  background-color: transparent;
+  color: #475569;
+  box-shadow: none;
+  border: 1px solid #cbd5e1;
+  width: auto;
+  padding: 0.5rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.logout-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 1.5rem;
   }
-  to {
-    transform: rotate(360deg);
+  h2 {
+    font-size: 1.5rem;
   }
 }
