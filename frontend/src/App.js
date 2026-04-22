@@ -4,17 +4,34 @@ import GuardiasAsignadas from "./Views/GuardiasAsignadas";
 import SolicitudCambio from "./Views/SolicitudCambio";
 import "./App.css";
 
+/**
+ * Componente raíz de la app.
+ *
+ * Responsabilidades:
+ * - Orquestar navegación simple por estado (`vista`) sin router.
+ * - Mantener el usuario autenticado y el contexto de selección de guardia.
+ * - Encadenar callbacks entre pantallas (login → listado → solicitud).
+ */
 function App() {
+  // Usuario autenticado (payload mínimo provisto por el backend).
   const [usuario, setUsuario] = useState(null);
+
+  // Guardia actualmente seleccionada para iniciar una solicitud de cambio.
   const [guardiaSeleccionada, setGuardiaSeleccionada] = useState(null);
+
+  // Cache local de guardias cargadas (se reutiliza en la pantalla de solicitud).
   const [guardias, setGuardias] = useState([]);
+
+  // Control de navegación interna: evita dependencia de rutas para un flujo lineal.
   const [vista, setVista] = useState("login"); // "login", "guardias", "solicitud"
 
+  // Callback que se ejecuta cuando Login valida credenciales con éxito.
   const handleLogin = (user) => {
     setUsuario(user);
     setVista("guardias");
   };
 
+  // Cierra sesión limpiando el estado compartido para evitar datos "arrastrados" entre usuarios.
   const handleLogout = () => {
     setUsuario(null);
     setGuardiaSeleccionada(null);
@@ -22,6 +39,7 @@ function App() {
     setVista("login");
   };
 
+  // Cambia el contexto de selección y navega según haya una guardia elegida o una cancelación.
   const handleSeleccionarGuardia = (guardia) => {
     if (guardia) {
       setGuardiaSeleccionada(guardia);
@@ -33,6 +51,7 @@ function App() {
     }
   };
 
+  // Handler específico para volver desde la pantalla de solicitud sin cerrar sesión.
   const handleCancelarSolicitud = () => {
     setVista("guardias");
     setGuardiaSeleccionada(null);

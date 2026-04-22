@@ -16,13 +16,21 @@ import {
  * @param {Function} onCancelar - Función para volver atrás.
  */
 const SolicitudCambio = ({ usuario, guardiaSeleccionada, guardias = [], onCancelar }) => {
+  // ID de guardia elegido en el selector; se inicializa con la guardia seleccionada en la pantalla previa.
   const [idGuardiaSeleccionada, setIdGuardiaSeleccionada] = useState(
     guardiaSeleccionada?.id_guardia ? String(guardiaSeleccionada.id_guardia) : ""
   );
+
+  // Motivo ingresado por el usuario (campo requerido por el contrato).
   const [motivo, setMotivo] = useState("");
+
+  // Alerta de UI para feedback de éxito/error (se muestra sin desmontar el componente).
   const [alerta, setAlerta] = useState(null); // { tipo: "success" | "error", texto: string }
+
+  // Flag de envío para deshabilitar inputs y evitar dobles submits.
   const [enviando, setEnviando] = useState(false);
 
+  // Deriva la guardia actual desde el listado disponible; evita duplicar estado con objetos completos.
   const guardiaActual = guardias.find(
     (g) => String(g.id_guardia) === String(idGuardiaSeleccionada)
   );
@@ -45,6 +53,7 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, guardias = [], onCancel
     e.preventDefault();
     setAlerta(null);
 
+    // Validaciones de precondición antes de llamar a la API (feedback inmediato al usuario).
     if (!guardiaActual) {
       setAlerta({ tipo: "error", texto: "❌ Seleccione una guardia." });
       return;
@@ -58,6 +67,7 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, guardias = [], onCancel
     setEnviando(true);
 
     try {
+      // Datos mínimos para el contrato del backend: identifica solicitante y guardia.
       const id_usuario = usuario?.id_usuario;
       const id_guardia = guardiaActual?.id_guardia;
 
@@ -77,6 +87,7 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, guardias = [], onCancel
         },
       });
 
+      // Errores de negocio más frecuentes (datos incompletos o conflicto de horario).
       if (response.status === 400 || response.status === 409) {
         setAlerta({ tipo: "error", texto: data?.error || "❌ No se pudo registrar la solicitud." });
         return;
@@ -90,6 +101,7 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, guardias = [], onCancel
         return;
       }
 
+      // Fallback: cualquier otro status no esperado se comunica como error genérico.
       setAlerta({ tipo: "error", texto: data?.error || "❌ Error al registrar la solicitud. Intente nuevamente." });
       
     } catch (error) {
@@ -109,8 +121,8 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, guardias = [], onCancel
         {guardiaActual ? (
           <p>
             <strong>ID Guardia:</strong> {guardiaActual.id_guardia} <br />
-            <strong>Fecha:</strong> {guardiaActual.fecha} <br />
-            <strong>Horario:</strong> {guardiaActual.horario}
+            <strong>Fecha:</strong> {formatFechaYYYYMMDDToDDMMYYYY(guardiaActual.fecha)} <br />
+            <strong>Horario:</strong> {formatHorarioHHMMToHHMM(guardiaActual.horario)}
           </p>
         ) : (
           <p>Seleccione una guardia para ver los datos.</p>

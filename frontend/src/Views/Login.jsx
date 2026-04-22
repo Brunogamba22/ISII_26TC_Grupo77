@@ -9,9 +9,13 @@ import { apiRequest } from "../apiClient";
  */
 const Login = ({ onLogin }) => {
   // Estados: parámetros del contrato
+  // Email ingresado por el usuario (credencial).
   const [email, setEmail] = useState("");
+  // Contraseña ingresada por el usuario (se envía como `contraseña` al backend por contrato).
   const [password, setPassword] = useState("");
+  // Mensaje de UI para feedback (éxito/error) sin depender de alertas del navegador.
   const [mensaje, setMensaje] = useState("");
+  // Flag para bloquear inputs y evitar doble submit mientras se valida contra la API.
   const [cargando, setCargando] = useState(false);
 
   /**
@@ -31,6 +35,7 @@ const Login = ({ onLogin }) => {
     setCargando(true);
 
     try {
+      // Llamada al contrato `/api/login`. Se mantiene el nombre `contraseña` por compatibilidad con backend.
       const { response, data } = await apiRequest("/login", {
         method: "POST",
         body: { email, contraseña: password },
@@ -58,8 +63,11 @@ const Login = ({ onLogin }) => {
         email,
       };
 
+      // Persistencia mínima para reutilizar el id en la sesión del navegador (no implica autorización real).
       localStorage.setItem("id_usuario", String(id_usuario));
       setMensaje("✅ Inicio de sesión exitoso. Redirigiendo...");
+
+      // Notifica al componente padre para avanzar al siguiente paso del flujo.
       onLogin(usuario);
       
     } catch (error) {

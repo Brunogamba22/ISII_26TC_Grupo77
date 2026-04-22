@@ -14,12 +14,20 @@ import {
  * @param {Function} onSeleccionarGuardia - Callback cuando elige una guardia.
  */
 const GuardiasAsignadas = ({ usuario, onSeleccionarGuardia, onGuardiasCargadas }) => {
+  // Lista de guardias asignadas retornadas por el backend para el usuario autenticado.
   const [guardias, setGuardias] = useState([]);
+
+  // Flag de carga para mostrar feedback mientras se consulta la API.
   const [cargando, setCargando] = useState(true);
+
+  // Mensaje de error de negocio o de conectividad para mostrar al usuario.
   const [error, setError] = useState("");
+
+  // ID de la guardia seleccionada en la lista (control de UI y habilitación del botón).
   const [guardiaSeleccionadaId, setGuardiaSeleccionadaId] = useState(null);
 
   useEffect(() => {
+    // Efecto: sincroniza el estado de la vista con el backend cada vez que cambia el usuario autenticado.
     const cargarGuardias = async () => {
       try {
         setError("");
@@ -49,6 +57,7 @@ const GuardiasAsignadas = ({ usuario, onSeleccionarGuardia, onGuardiasCargadas }
 
         const lista = Array.isArray(data?.guardias) ? data.guardias : [];
         setGuardias(lista);
+        // Eleva las guardias al componente padre para reutilizarlas (evita doble fetch).
         onGuardiasCargadas?.(lista);
         setCargando(false);
       } catch (err) {
@@ -60,6 +69,7 @@ const GuardiasAsignadas = ({ usuario, onSeleccionarGuardia, onGuardiasCargadas }
     cargarGuardias();
   }, [usuario?.id_usuario, onGuardiasCargadas]);
 
+  // Deriva la guardia seleccionada desde el ID para mantener la UI simple.
   const guardiaSeleccionada = guardias.find(
     (g) => Number(g.id_guardia) === Number(guardiaSeleccionadaId)
   );
