@@ -4,71 +4,83 @@ import { useState } from "react";
 // Componente Login que recibe una función onLogin como prop
 const Login = ({ onLogin }) => {
 
-  // Estado para guardar el email ingresado
+  // Estado para guardar el email ingresado (parámetro del contrato)
   const [email, setEmail] = useState("");
 
-  // Estado para guardar la contraseña ingresada
+  // Estado para guardar la contraseña ingresada (parámetro del contrato)
   const [contraseña, setContraseña] = useState("");
 
-  // Estado para mostrar mensajes de error o alerta
+  // Estado para mostrar mensajes de error o alerta (curso alternativo)
   const [mensaje, setMensaje] = useState("");
-  
-// Simulación de login SIN backend
-const iniciarSesion = (e) => {
+
+  // Función que ejecuta el proceso de autenticación
+  const iniciarSesion = (e) => {
+
+    // Evita recarga de página
     e.preventDefault();
-  
-    // Validación simple simulada
-    if (email === "medico@hospital.com" && contraseña === "123") {
-  
-      // Simulamos usuario válido
-      const usuarioFake = {
-        id_usuario: 1,
-        nombre: "Juan"
-      };
-  
-      onLogin(usuarioFake);
-      setMensaje("");
-  
-    } else {
-      setMensaje("Credenciales incorrectas o usuario inexistente");
+
+    // VALIDACIÓN (Curso Alternativo 1)
+    // Si faltan datos → error según contrato
+    if (!email || !contraseña) {
+      setMensaje("Datos incompletos");
+      return;
     }
+
+    // SIMULACIÓN BACKEND (Trazabilidad: Validar credenciales)
+    const usuarioEncontrado =
+      email === "medico@hospital.com" && contraseña === "123";
+
+    // Curso Alternativo 2.1.1 (credenciales inválidas)
+    if (!usuarioEncontrado) {
+      setMensaje("Credenciales incorrectas o usuario inexistente");
+      return;
+    }
+
+    // POST-CONDICIÓN: creación de sesión (simulada)
+    const usuario = {
+      id_usuario: 1,
+      nombre: "Juan"
+    };
+
+    // Mensaje limpio
+    setMensaje("");
+
+    // Trazabilidad: Usuario válido → pasa a siguiente pantalla
+    onLogin(usuario);
   };
- 
-  // Retornamos el JSX (interfaz)
+
+  // Vista (Frontend = V del MVC)
   return (
     <div>
 
-      {/* Título */}
       <h2>Login</h2>
 
-      {/* Formulario que ejecuta iniciarSesion al enviarse */}
       <form onSubmit={iniciarSesion}>
 
-        {/* Input para email */}
+        {/* Campo EMAIL (input del contrato) */}
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)} // Actualiza el estado
+          onChange={(e) => setEmail(e.target.value)}
         />
 
-        {/* Input para contraseña */}
+        {/* Campo CONTRASEÑA */}
         <input
           type="password"
           placeholder="Contraseña"
           value={contraseña}
-          onChange={(e) => setContraseña(e.target.value)} // Actualiza el estado
+          onChange={(e) => setContraseña(e.target.value)}
         />
 
-        {/* Botón para enviar el formulario */}
+        {/* Botón que dispara el caso de uso */}
         <button type="submit">Ingresar</button>
       </form>
 
-      {/* Si hay mensaje, lo mostramos en rojo */}
+      {/* Mensaje de error (curso alternativo) */}
       {mensaje && <p style={{ color: "red" }}>{mensaje}</p>}
     </div>
   );
 };
 
-// Exportamos el componente para poder usarlo en App.js
 export default Login;
