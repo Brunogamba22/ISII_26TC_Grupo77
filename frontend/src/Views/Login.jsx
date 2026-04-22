@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiRequest } from "../apiClient";
 
 /**
  * Componente Login
@@ -30,33 +31,35 @@ const Login = ({ onLogin }) => {
     setCargando(true);
 
     try {
-      // SIMULACIÓN / CONEXIÓN CON BACKEND
-      // Aquí se debe reemplazar por una llamada real al endpoint de autenticación.
-      // Endpoint sugerido: POST /api/auth/login
-      // Body: { email, contraseña }  (contraseña en texto plano solo para demo, en producción usar HTTPS y hash)
-      // Esperado: { id_usuario, nombre, token? } o error 401.
-      
-      // Simulación con credenciales fijas (como en tu versión original)
-      const esValido = email === "medico@hospital.com" && password === "123";
-      
-      if (!esValido) {
-        // Curso Alternativo 2.1.1 - Credenciales incorrectas o usuario inexistente
-        setMensaje("❌ Credenciales incorrectas o usuario inexistente.");
-        setCargando(false);
+      const { response, data } = await apiRequest("/login", {
+        method: "POST",
+        body: { email, contraseña: password },
+      });
+
+      if (response.status === 401) {
+        setMensaje(data?.error || "Credenciales inválidas.");
         return;
       }
 
-      // Post-condición: Se crea una instancia de Sesión (simulada con objeto usuario)
+      if (!response.ok) {
+        setMensaje(data?.error || "❌ Error al iniciar sesión. Intente nuevamente.");
+        return;
+      }
+
+      const id_usuario = data?.usuario?.id_usuario;
+      if (!id_usuario) {
+        setMensaje("❌ Respuesta inválida del servidor (falta id_usuario).");
+        return;
+      }
+
       const usuario = {
-        id_usuario: 1,
-        nombre: "Dr. Juan Pérez",
-        email: email
+        id_usuario,
+        nombre: data?.usuario?.nombre || "Usuario",
+        email,
       };
 
-      // Mensaje de éxito (opcional)
+      localStorage.setItem("id_usuario", String(id_usuario));
       setMensaje("✅ Inicio de sesión exitoso. Redirigiendo...");
-      
-      // Trazabilidad: Usuario válido -> se notifica al componente padre
       onLogin(usuario);
       
     } catch (error) {
@@ -112,11 +115,8 @@ const Login = ({ onLogin }) => {
         )}
       </form>
 
-      {/* Nota para el desarrollador backend */}
-      <div style={{ marginTop: '2rem', fontSize: '0.8rem', color: '#64748b', borderTop: '1px dashed #cbd5e1', paddingTop: '1rem' }}>
-        <strong>📋 Trazabilidad backend:</strong> POST /api/auth/login <br/>
-        Body: &#123; email, contraseña &#125; → Respuesta esperada: &#123; id_usuario, nombre, ... &#125; o error 401.
-      </div>
+      
+      
     </div>
   );
 };

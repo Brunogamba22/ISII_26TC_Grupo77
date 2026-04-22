@@ -1,4 +1,9 @@
 import { useState } from "react";
+import { apiRequest } from "../apiClient";
+import {
+  formatFechaYYYYMMDDToDDMMYYYY,
+  formatHorarioHHMMToHHMM,
+} from "../utils/formatters";
 
 /**
  * Componente SolicitudCambio
@@ -10,16 +15,23 @@ import { useState } from "react";
  * @param {Object} guardiaSeleccionada - Guardia que se desea cambiar (obtenida de GuardiasAsignadas).
  * @param {Function} onCancelar - Función para volver atrás.
  */
-const SolicitudCambio = ({ usuario, guardiaSeleccionada, onCancelar }) => {
+const SolicitudCambio = ({ usuario, guardiaSeleccionada, guardias = [], onCancelar }) => {
+  const [idGuardiaSeleccionada, setIdGuardiaSeleccionada] = useState(
+    guardiaSeleccionada?.id_guardia ? String(guardiaSeleccionada.id_guardia) : ""
+  );
   const [motivo, setMotivo] = useState("");
-  const [mensaje, setMensaje] = useState("");
+  const [alerta, setAlerta] = useState(null); // { tipo: "success" | "error", texto: string }
   const [enviando, setEnviando] = useState(false);
 
-  // Si no hay guardia seleccionada, no debería renderizarse este componente
-  if (!guardiaSeleccionada) {
+  const guardiaActual = guardias.find(
+    (g) => String(g.id_guardia) === String(idGuardiaSeleccionada)
+  );
+
+  // Si no hay guardias disponibles, no debería renderizarse este componente
+  if (!Array.isArray(guardias) || guardias.length === 0) {
     return (
       <div className="container error-message">
-        Error: No se ha seleccionado ninguna guardia.
+        No hay guardias disponibles para solicitar cambio.
         <button onClick={onCancelar}>Volver</button>
       </div>
     );
@@ -31,48 +43,58 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, onCancelar }) => {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMensaje("");
+    setAlerta(null);
 
-    // Validación: motivo no vacío (Curso Alternativo 6.1.1)
+    if (!guardiaActual) {
+      setAlerta({ tipo: "error", texto: "❌ Seleccione una guardia." });
+      return;
+    }
+
     if (!motivo.trim()) {
-      setMensaje("❌ Debe especificar un motivo para la solicitud.");
+      setAlerta({ tipo: "error", texto: "❌ Ingrese el motivo." });
       return;
     }
 
     setEnviando(true);
 
     try {
-      // --- CONTRATO crearSolicitudDeCambio ---
-      // Parámetros:
-      // - solicitante: usuario.id_usuario
-      // - id_guardia: guardiaSeleccionada.id_guardia
-      // - fecha_hora: (implícita en la guardia, pero puede enviarse también)
-      // - motivo: motivo ingresado
-      
-      // Endpoint sugerido: POST /api/solicitudes-cambio
-      // Body: { id_usuario_solicitante, id_guardia, motivo }
-      
-      // SIMULACIÓN de envío al backend
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Simulamos éxito
-      // Post-condiciones (según contrato):
-      // - Se crea instancia Reemplazo con estado "pendiente"
-      // - Se asocia a Usuario y Guardia
-      
-      setMensaje("✅ Solicitud registrada exitosamente. Estado: pendiente.");
-      
-      // Limpiar formulario y opcionalmente redirigir después de unos segundos
-      setMotivo("");
-      
-      // Después de 2 segundos, volver al listado de guardias
-      setTimeout(() => {
-        onCancelar(); // o una función onSuccess específica
-      }, 2000);
+      const id_usuario = usuario?.id_usuario;
+      const id_guardia = guardiaActual?.id_guardia;
+
+      if (!id_usuario || !id_guardia) {
+        setAlerta({ tipo: "error", texto: "❌ No se pudo identificar usuario o guardia." });
+        return;
+      }
+
+      const { response, data } = await apiRequest("/solicitudes", {
+        method: "POST",
+        body: {
+          fecha: guardiaActual.fecha,
+          hora: guardiaActual.horario,
+          motivo,
+          id_guardia,
+          id_usuario,
+        },
+      });
+
+      if (response.status === 400 || response.status === 409) {
+        setAlerta({ tipo: "error", texto: data?.error || "❌ No se pudo registrar la solicitud." });
+        return;
+      }
+
+      if (response.status === 201) {
+        // Primero mostramos el éxito, luego limpiamos inputs sin desmontar el componente.
+        setAlerta({ tipo: "success", texto: data?.mensaje || "✅ Solicitud registrada correctamente" });
+        setMotivo("");
+        setIdGuardiaSeleccionada("");
+        return;
+      }
+
+      setAlerta({ tipo: "error", texto: data?.error || "❌ Error al registrar la solicitud. Intente nuevamente." });
       
     } catch (error) {
       console.error("Error al enviar solicitud:", error);
-      setMensaje("❌ Error al registrar la solicitud. Intente nuevamente.");
+      setAlerta({ tipo: "error", texto: "❌ Error al registrar la solicitud. Intente nuevamente." });
     } finally {
       setEnviando(false);
     }
@@ -84,17 +106,39 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, onCancelar }) => {
       
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Guardia seleccionada</h3>
-        <p>
-          <strong>Fecha:</strong> {guardiaSeleccionada.fecha} <br />
-          <strong>Horario:</strong> {guardiaSeleccionada.hora_inicio} - {guardiaSeleccionada.hora_fin} <br />
-          <strong>Especialidad:</strong> {guardiaSeleccionada.especialidad}
-        </p>
+        {guardiaActual ? (
+          <p>
+            <strong>ID Guardia:</strong> {guardiaActual.id_guardia} <br />
+            <strong>Fecha:</strong> {guardiaActual.fecha} <br />
+            <strong>Horario:</strong> {guardiaActual.horario}
+          </p>
+        ) : (
+          <p>Seleccione una guardia para ver los datos.</p>
+        )}
         <p style={{ fontSize: '0.9rem', color: '#475569' }}>
           Solicitante: {usuario.nombre}
         </p>
       </div>
 
       <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="guardia">Guardia *</label>
+          <select
+            id="guardia"
+            value={idGuardiaSeleccionada}
+            onChange={(e) => setIdGuardiaSeleccionada(e.target.value)}
+            disabled={enviando}
+          >
+            <option value="">-- Seleccione --</option>
+            {guardias.map((g) => (
+              <option key={g.id_guardia} value={String(g.id_guardia)}>
+                #{g.id_guardia} · {formatFechaYYYYMMDDToDDMMYYYY(g.fecha)} ·{" "}
+                {formatHorarioHHMMToHHMM(g.horario)}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="form-group">
           <label htmlFor="motivo">Motivo del cambio *</label>
           <textarea
@@ -123,18 +167,19 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, onCancelar }) => {
           </button>
         </div>
 
-        {mensaje && (
-          <div className={mensaje.startsWith("✅") ? "success-message" : "error-message"}>
-            {mensaje}
-          </div>
-        )}
+        {/* Contenedor estático para estabilidad del DOM */}
+        <div aria-live="polite" style={{ marginTop: "1rem" }}>
+          {alerta ? (
+            <div className={alerta.tipo === "success" ? "success-message" : "error-message"}>
+              {alerta.texto}
+            </div>
+          ) : (
+            <div />
+          )}
+        </div>
       </form>
 
-      {/* Nota para trazabilidad backend */}
-      <div style={{ marginTop: '2rem', fontSize: '0.8rem', color: '#64748b', borderTop: '1px dashed #cbd5e1', paddingTop: '1rem' }}>
-        <strong>📋 Trazabilidad backend:</strong> POST /api/solicitudes-cambio <br/>
-        Body: &#123; id_usuario_solicitante, id_guardia, motivo &#125; → Esperado: 201 Created.
-      </div>
+      
     </div>
   );
 };

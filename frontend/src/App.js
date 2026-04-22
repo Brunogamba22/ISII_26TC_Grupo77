@@ -7,6 +7,7 @@ import "./App.css";
 function App() {
   const [usuario, setUsuario] = useState(null);
   const [guardiaSeleccionada, setGuardiaSeleccionada] = useState(null);
+  const [guardias, setGuardias] = useState([]);
   const [vista, setVista] = useState("login"); // "login", "guardias", "solicitud"
 
   const handleLogin = (user) => {
@@ -17,6 +18,7 @@ function App() {
   const handleLogout = () => {
     setUsuario(null);
     setGuardiaSeleccionada(null);
+    setGuardias([]);
     setVista("login");
   };
 
@@ -50,6 +52,7 @@ function App() {
           <GuardiasAsignadas 
             usuario={usuario} 
             onSeleccionarGuardia={handleSeleccionarGuardia} 
+            onGuardiasCargadas={setGuardias}
           />
         </>
       )}
@@ -64,6 +67,7 @@ function App() {
           <SolicitudCambio 
             usuario={usuario}
             guardiaSeleccionada={guardiaSeleccionada}
+            guardias={guardias}
             onCancelar={handleCancelarSolicitud}
           />
         </>
