@@ -2,6 +2,7 @@ import { useState } from "react";
 import Login from "./Views/Login";
 import GuardiasAsignadas from "./Views/GuardiasAsignadas";
 import SolicitudCambio from "./Views/SolicitudCambio";
+import AsignacionAutomatica from "./Views/AsignacionAutomatica";
 import "./App.css";
 
 /**
@@ -23,7 +24,9 @@ function App() {
   const [guardias, setGuardias] = useState([]);
 
   // Control de navegación interna: evita dependencia de rutas para un flujo lineal.
-  const [vista, setVista] = useState("login"); // "login", "guardias", "solicitud"
+  const [vista, setVista] = useState("login"); 
+  // login | guardias | solicitud | asignacionAutomatica
+  
 
   // Callback que se ejecuta cuando Login valida credenciales con éxito.
   const handleLogin = (user) => {
@@ -64,10 +67,20 @@ function App() {
       {vista === "guardias" && usuario && (
         <>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+            
             <button className="logout-btn" onClick={handleLogout}>
               Cerrar sesión ({usuario.nombre})
             </button>
           </div>
+          <div style={{ marginBottom: "1rem" }}>
+
+          <button
+            onClick={() => setVista("asignacionAutomatica")}
+          >
+            Ir a Asignación Automática
+          </button>
+          </div>
+
           <GuardiasAsignadas 
             usuario={usuario} 
             onSeleccionarGuardia={handleSeleccionarGuardia} 
@@ -89,6 +102,18 @@ function App() {
             guardias={guardias}
             onCancelar={handleCancelarSolicitud}
           />
+        </>
+      )}
+
+      {vista === "asignacionAutomatica" && usuario && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+            <button className="logout-btn" onClick={handleLogout}>
+              Cerrar sesión ({usuario.nombre})
+            </button>
+          </div>
+
+          <AsignacionAutomatica />
         </>
       )}
     </div>
