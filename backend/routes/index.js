@@ -2,7 +2,13 @@ const express = require("express");
 const { validarCredenciales } = require("../controllers/authController");
 const {
   consultarGuardiasAsignadas,
+  asignarGuardiasAutomaticamente
 } = require("../controllers/guardiaController");
+
+const {
+  configurarParametrosDistribucion
+} = require("../controllers/calendarioController");
+
 const {
   crearSolicitudDeCambio,
 } = require("../controllers/solicitudController");
@@ -27,5 +33,13 @@ router.post("/api/solicitudes", crearSolicitudDeCambio);
 
 // Guardia: consulta guardias asignadas por id de usuario (lectura).
 router.get("/api/guardias/:id_usuario", consultarGuardiasAsignadas);
+
+// --- NUEVAS RUTAS: ASIGNACIÓN MASIVA DE GUARDIAS ---
+
+// Configuración: recibe mes, año y reglas de distribución (Contrato 3).
+router.post("/api/asignacion/configurar", configurarParametrosDistribucion);
+
+// Generación: ejecuta el algoritmo de asignación automática (Contrato 4).
+router.post("/api/asignacion/generar", asignarGuardiasAutomaticamente);
 
 module.exports = router;
