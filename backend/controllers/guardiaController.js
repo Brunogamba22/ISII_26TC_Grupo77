@@ -1,24 +1,16 @@
-const { guardias } = require("../models/datos");
+const { guardias } = require("../models/datos"); // Conservado del Sprint 1
+const db = require("../models/db"); // Tu Singleton de conexión a MySQL
+const MotorDeAsignacion = require('../estrategias/MotorDeAsignacion');
+const AsignacionEquitativa = require('../estrategias/AsignacionEquitativa');
 
 /**
  * Controlador: consulta guardias asignadas a un profesional.
- *
- * Motivo:
- * - El frontend necesita listar únicamente las guardias del usuario autenticado.
- * - Se utiliza `id_usuario` como parámetro de ruta para expresar el recurso consultado.
- *
- * Respuestas:
- * - 200: Devuelve `{ guardias: [...] }` con las guardias encontradas.
- * - 404: No hay guardias asignadas para el usuario.
- *
- * @param {import("express").Request} req Request HTTP (params: { id_usuario }).
- * @param {import("express").Response} res Response HTTP.
- * @returns {import("express").Response} Respuesta JSON con guardias o mensaje de ausencia.
+ * (Sprint 1 - Datos simulados en memoria)
  */
 function consultarGuardiasAsignadas(req, res) {
   const { id_usuario } = req.params;
 
-  // Normaliza a número para evitar discrepancias string/number al comparar IDs.
+  // Normaliza a número para evitar discrepancies string/number al comparar IDs.
   const guardiasAsignadas = guardias.filter(
     (g) => Number(g.id_usuario) === Number(id_usuario)
   );
@@ -30,5 +22,86 @@ function consultarGuardiasAsignadas(req, res) {
   return res.status(200).json({ guardias: guardiasAsignadas });
 }
 
-module.exports = { consultarGuardiasAsignadas };
 
+/**
+ * Controlador: Asignar guardias automáticamente (Contrato 4).
+ * * Responsabilidades:
+ * - Consultar profesionales disponibles por especialidad.
+ * - Validar que existan suficientes profesionales.
+ * - Ejecutar el motor de asignación (Patrón Estrategia).
+ * - Guardar las guardias generadas en la base de datos.
+ */
+async function asignarGuardiasAutomaticamente(req, res) {
+  try {
+    // 1. Recibir los parámetros del body
+    const { id_calendario, diasDelMes, id_especialidad, anio, mes } = req.body;
+
+    // Validación básica de parámetros de entrada
+    if (!id_calendario || !diasDelMes || !id_especialidad || !anio || !mes) {
+        return res.status(400).json({ error: "Faltan parámetros requeridos para la generación." });
+    }
+
+    // 2. Obtener los médicos disponibles para esa especialidad
+    const [profesionales] = await db.query(
+      'SELECT id_usuario, nombre, apellido FROM usuario WHERE id_especialidad = ?',
+      [id_especialidad]
+    );
+
+    // 3. Validación Crítica (Excepción del Contrato 4)
+    if (!profesionales || profesionales.length < 2) {
+      return res.status(400).json({ 
+        error: "No hay suficientes profesionales para generar las guardias" 
+      });
+    }
+
+    // 4. Instanciar el motor de asignación y ejecutar el algoritmo
+    const motor = new MotorDeAsignacion(new AsignacionEquitativa());
+    const turnosGenerados = motor.ejecutar(profesionales, diasDelMes);
+
+    // 5. Iterar sobre los turnos generados y hacer el INSERT
+    for (const turno of turnosGenerados) {
+      // Formateamos mes y día para que siempre tengan 2 dígitos (ej: '05' en vez de '5')
+      const mesFormateado = String(mes).padStart(2, '0');
+      const diaFormateado = String(turno.dia).padStart(2, '0');
+      
+      // Armamos la fecha en formato YYYY-MM-DD exigido por MySQL
+      const fecha = `${anio}-${mesFormateado}-${diaFormateado}`;
+      
+      const hora_inicio = '08:00:00';
+      const hora_fin = '20:00:00';
+      const estado = 'asignada';
+
+      await db.query(
+        `INSERT INTO guardia (fecha, hora_inicio, hora_fin, estado, id_calendario, id_especialidad, id_usuario) 
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [fecha, hora_inicio, hora_fin, estado, id_calendario, id_especialidad, turno.id_usuario]
+      );
+    }
+
+    // 6. Devolver éxito con el resumen de los turnos
+    return res.status(200).json({
+      mensaje: "Guardias generadas y asignadas exitosamente.",
+      turnos: turnosGenerados
+    });
+
+  } catch (error) {
+    console.error("❌ Error en asignarGuardiasAutomaticamente:", error.message);
+    
+    // Si el error provino directamente del lanzamiento dentro de la clase AsignacionEquitativa
+    if (error.message.includes("No hay suficientes profesionales")) {
+      return res.status(400).json({ 
+        error: "No hay suficientes profesionales para generar las guardias" 
+      });
+    }
+
+    return res.status(500).json({ 
+      error: "Error interno del servidor al generar las guardias." 
+    });
+  }
+}
+
+// Exportamos ambos métodos para que el enrutador de la API pueda consumirlos
+module.exports = {
+  consultarGuardiasAsignadas,
+  asignarGuardiasAutomaticamente
+};

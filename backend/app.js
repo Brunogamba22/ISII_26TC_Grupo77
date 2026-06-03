@@ -2,7 +2,7 @@ require('dotenv').config(); // 1. Cargamos las variables de entorno (.env) prime
 const express = require("express");
 const cors = require("cors");
 const routes = require("./routes/index");
-const pool = require('./db');
+const pool = require('./models/db');
 
 const app = express();
 
