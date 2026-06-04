@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiRequest } from "../apiClient";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Componente Login
@@ -9,6 +10,7 @@ import { apiRequest } from "../apiClient";
  */
 const Login = ({ onLogin }) => {
   // Estados: parámetros del contrato
+  const navigate = useNavigate();
   // Email ingresado por el usuario (credencial).
   const [email, setEmail] = useState("");
   // Contraseña ingresada por el usuario (se envía como `contraseña` al backend por contrato).
@@ -52,23 +54,28 @@ const Login = ({ onLogin }) => {
       }
 
       const id_usuario = data?.usuario?.id_usuario;
-      if (!id_usuario) {
-        setMensaje("❌ Respuesta inválida del servidor (falta id_usuario).");
+      const rol = data?.usuario?.rol; // <-- Recuperamos el rol del JSON
+
+      if (!id_usuario || !rol) {
+        setMensaje("❌ Respuesta inválida del servidor.");
         return;
       }
 
-      const usuario = {
-        id_usuario,
-        nombre: data?.usuario?.nombre || "Usuario",
-        email,
-      };
-
-      // Persistencia mínima para reutilizar el id en la sesión del navegador (no implica autorización real).
+      // Guardamos la info en el localStorage para que RutaProtegida lo lea
       localStorage.setItem("id_usuario", String(id_usuario));
+      localStorage.setItem("rol", rol);
+      localStorage.setItem("nombre", data.usuario.nombre);
+
       setMensaje("✅ Inicio de sesión exitoso. Redirigiendo...");
 
-      // Notifica al componente padre para avanzar al siguiente paso del flujo.
-      onLogin(usuario);
+      // Redirección inteligente basada en el rol
+      if (rol === "Administrador") {
+        navigate("/admin");
+      } else if (rol === "Profesional") {
+        navigate("/medico");
+      } else {
+        setMensaje("❌ Rol no reconocido.");
+      }
       
     } catch (error) {
       console.error("Error en autenticación:", error);
