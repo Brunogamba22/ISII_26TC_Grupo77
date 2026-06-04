@@ -40,7 +40,7 @@ const Login = ({ onLogin }) => {
       // Llamada al contrato `/api/login`. Se mantiene el nombre `contraseña` por compatibilidad con backend.
       const { response, data } = await apiRequest("/login", {
         method: "POST",
-        body: { email, contraseña: password },
+        body: { email, contrasena: password },
       });
 
       if (response.status === 401) {
