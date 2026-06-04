@@ -15,15 +15,28 @@ async function configurarParametrosDistribucion(req, res) {
 
     // Validación básica de campos requeridos
     if (!mes || !anio || !reglasEquidad) {
-      return res.status(400).json({ error: "Los campos mes, anio y reglasEquidad son obligatorios." });
+      return res.status(400).json({ error: "Los campos mes, año y reglasEquidad son obligatorios." });
     }
+    
+     // VALIDAR DUPLICADOS
+      const [existente] = await db.query(
+        `SELECT * FROM calendario
+        WHERE mes = ? AND anio = ?`,
+        [mes, anio]
+      );
+
+      if (existente.length > 0) {
+        return res.status(400).json({
+          error: "Ya existe un cronograma generado para ese mes y año."
+        });
+      }
 
     // Convertimos el objeto o array de reglas a un string JSON para guardarlo en el campo observaciones
     const reglasString = JSON.stringify(reglasEquidad);
 
     // Consulta SQL utilizando el pool de conexiones
     const query = `
-      INSERT INTO calendario (mes, año, estado, observaciones) 
+      INSERT INTO calendario (mes, anio, estado, observaciones) 
       VALUES (?, ?, ?, ?)
     `;
     

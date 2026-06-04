@@ -58,6 +58,18 @@ async function asignarGuardiasAutomaticamente(req, res) {
     const motor = new MotorDeAsignacion(new AsignacionEquitativa());
     const turnosGenerados = motor.ejecutar(profesionales, diasDelMes);
 
+    // VALIDAR DUPLICADOS
+    //const [guardiasExistentes] = await db.query(
+    //  `SELECT * FROM guardia
+    //  WHERE id_calendario = ?`,
+    //  [id_calendario]
+    //);
+
+    if (guardiasExistentes.length > 0) {
+      return res.status(400).json({
+        error: "Ya existen guardias generadas para este calendario."
+      });
+    }
     // 5. Iterar sobre los turnos generados y hacer el INSERT
     for (const turno of turnosGenerados) {
       // Formateamos mes y día para que siempre tengan 2 dígitos (ej: '05' en vez de '5')
@@ -78,10 +90,22 @@ async function asignarGuardiasAutomaticamente(req, res) {
       );
     }
 
-    // 6. Devolver éxito con el resumen de los turnos
     return res.status(200).json({
       mensaje: "Guardias generadas y asignadas exitosamente.",
-      turnos: turnosGenerados
+      turnos: turnosGenerados.map((turno) => {
+        const profesional = profesionales.find(
+          (p) => p.id_usuario === turno.id_usuario
+        );
+    
+        return {
+          ...turno,
+          nombreCompleto: profesional
+            ? `${profesional.nombre} ${profesional.apellido}`
+            : "Profesional desconocido",
+          horario: "08:00 - 20:00",
+          estado: "Asignada"
+        };
+      })
     });
 
   } catch (error) {

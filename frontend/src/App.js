@@ -113,7 +113,9 @@ function App() {
             </button>
           </div>
 
-          <AsignacionAutomatica />
+          <AsignacionAutomatica
+            onVolver={() => setVista("guardias")}
+          />
         </>
       )}
     </div>

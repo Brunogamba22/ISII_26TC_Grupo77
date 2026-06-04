@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { apiRequest } from "../apiClient";
 
-const AsignacionAutomatica = () => {
+const AsignacionAutomatica = ({ onVolver }) => {
 
   const [mes, setMes] = useState("");
   const [anio, setAnio] = useState(new Date().getFullYear());
@@ -13,15 +14,130 @@ const AsignacionAutomatica = () => {
 
   const [observaciones, setObservaciones] = useState("");
 
-  const handleGenerar = () => {
-    console.log({
-      mes,
-      anio,
-      maxGuardiasConsecutivas,
-      equidadFinesSemana,
-      evitarEspecialidadesCriticas,
-      observaciones
-    });
+  const [mensaje, setMensaje] = useState("");// Mensaje de UI para feedback de éxito/error (se muestra sin desmontar el componente).
+  const [turnosGenerados, setTurnosGenerados] = useState([]);// Lista de turnos generados.
+  const [cargando, setCargando] = useState(false);// Flag de carga para mostrar feedback mientras se generan los turnos.
+  
+
+  const handleGenerar = async () => {
+
+    setMensaje("");
+  
+    // Validación básica
+    if (!mes || !anio) {
+      setMensaje("❌ Debe completar mes y año.");
+      return;
+    }
+
+    if (anio < 2025) {
+      setMensaje("❌ El año debe ser válido.");
+      return;
+    }
+  
+    // Confirmación requerida por el caso de uso
+    const confirmado = window.confirm(
+      "¿Desea generar automáticamente las guardias?"
+    );
+  
+    if (!confirmado) {
+      return;
+    }
+  
+    setCargando(true);
+    setTurnosGenerados([]);
+    try {
+  
+      // =========================
+      // PASO 1 -> CONFIGURAR
+      // =========================
+  
+      const reglasEquidad = {
+        maxGuardiasConsecutivas,
+        equidadFinesSemana,
+        evitarEspecialidadesCriticas,
+        observaciones
+      };
+  
+      const configuracion = await apiRequest(
+        "/asignacion/configurar",
+        {
+          method: "POST",
+          body: {
+            mes,
+            anio,
+            reglasEquidad
+          }
+        }
+      );
+  
+      if (!configuracion.response.ok) {
+        setMensaje(
+          configuracion.data?.error ||
+          "❌ Error configurando parámetros."
+        );
+        return;
+      }
+  
+      const id_calendario =
+        configuracion.data.id_calendario;
+  
+      // =========================
+      // PASO 2 -> GENERAR
+      // =========================
+  
+      const diasDelMes = new Date(anio, mes, 0).getDate();
+  
+      const generacion = await apiRequest(
+        "/asignacion/generar",
+        {
+          method: "POST",
+          body: {
+            id_calendario,
+            diasDelMes,
+            id_especialidad: 1,
+            anio,
+            mes
+          }
+        }
+      );
+  
+      // =========================
+      // ERROR DE NEGOCIO
+      // =========================
+  
+      if (!generacion.response.ok) {
+  
+        setMensaje(
+          generacion.data?.error ||
+          "❌ Error generando guardias."
+        );
+  
+        return;
+      }
+  
+      // =========================
+      // ÉXITO
+      // =========================
+  
+      setMensaje("✅ Guardias generadas correctamente.");
+  
+      setTurnosGenerados(
+        generacion.data.turnos || []
+      );
+  
+    } catch (error) {
+  
+      console.error(error);
+  
+      setMensaje(
+        "❌ Error de conexión con el servidor."
+      );
+  
+    } finally {
+  
+      setCargando(false);
+  
+    }
   };
 
   return (
@@ -60,7 +176,7 @@ const AsignacionAutomatica = () => {
           <input
             type="number"
             value={anio}
-            onChange={(e) => setAnio(e.target.value)}
+            onChange={(e) => setAnio(Number(e.target.value))}
           />
         </div>
 
@@ -69,7 +185,14 @@ const AsignacionAutomatica = () => {
         <h3>⚙️ Reglas Equitativas</h3>
 
         <div className="form-group">
-          <label>Máximo de guardias consecutivas</label>
+        <label>
+          Máximo de guardias consecutivas
+        </label>
+
+        <small>
+          Ejemplo: 3 significa que un profesional no podrá
+          trabajar más de 3 guardias seguidas.
+        </small>
 
           <input
             type="number"
@@ -77,7 +200,7 @@ const AsignacionAutomatica = () => {
             max="10"
             value={maxGuardiasConsecutivas}
             onChange={(e) =>
-              setMaxGuardiasConsecutivas(e.target.value)
+              setMaxGuardiasConsecutivas(Number(e.target.value))
             }
           />
         </div>
@@ -92,7 +215,7 @@ const AsignacionAutomatica = () => {
           />
 
           <label>
-            Distribución equitativa de fines de semana
+            Distribuir equitativamente las guardias de fines de semana
           </label>
         </div>
 
@@ -114,6 +237,10 @@ const AsignacionAutomatica = () => {
 
         <div className="form-group">
           <label>Observaciones</label>
+          <small>
+            Ejemplo: Priorizar médicos de terapia intensiva
+            para turnos nocturnos.
+          </small>
 
           <textarea
             rows="4"
@@ -124,11 +251,117 @@ const AsignacionAutomatica = () => {
           />
         </div>
 
-        <button onClick={handleGenerar}>
-          Generar Asignación Automática
+        <button
+          onClick={handleGenerar}
+          disabled={cargando}
+          style={{
+            opacity: cargando ? 0.7 : 1,
+            cursor: cargando ? "not-allowed" : "pointer"
+          }}
+        >
+          {cargando
+            ? "Generando..."
+            : "Generar Asignación Automática"}
         </button>
 
+        <button
+          type="button"
+          onClick={onVolver}
+          style={{ marginTop: "1rem" }}
+          >
+          Volver
+        </button>
+
+        {mensaje && (
+          <div
+            className={
+              mensaje.startsWith("✅")
+                ? "success-message"
+                : "error-message"
+            }
+          >
+            {mensaje}
+          </div>
+        )}
+
+        {mensaje.includes("No hay suficientes profesionales") && (
+          <div className="card">
+            <h4>⚠️ Asignación Manual Recomendada</h4>
+
+            <p>
+              El sistema no encontró suficientes profesionales
+              para cubrir todos los turnos automáticamente.
+            </p>
+
+            <p>
+              Se recomienda realizar una asignación manual
+              de guardias.
+            </p>
+          </div>
+        )}
+
       </div>
+
+
+      {turnosGenerados.length > 0 && (
+
+      <div className="card">
+
+          <h3>
+            📋 Cronograma Generado
+          </h3>
+
+          <p>
+            <strong>Total de guardias generadas:</strong>{" "}
+            {turnosGenerados.length}
+          </p>
+
+          <p>
+            <strong>Estado del cronograma:</strong>{" "}
+            Confirmado
+          </p>
+
+          <button
+            onClick={() => window.print()}
+            style={{ marginBottom: "1rem" }}
+          >
+            Exportar Cronograma
+          </button>
+
+          {turnosGenerados.map((turno, index) => (
+
+       <div
+        key={index}
+        className="guardia-item"
+       >
+
+        <div>
+
+          <strong>
+            Día:
+          </strong> {turno.dia}
+
+          <br />
+
+          <strong>Profesional:</strong> {turno.nombreCompleto}
+
+            <br />
+
+            <strong>Horario:</strong> {turno.horario}
+
+            <br />
+
+          <strong>Estado:</strong> {turno.estado}
+
+        </div>
+
+        </div>
+
+            ))}
+
+        </div>
+
+          )}
     </div>
   );
 };
