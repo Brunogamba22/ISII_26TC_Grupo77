@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { apiRequest } from "../apiClient";
 import { useNavigate } from "react-router-dom";
+import { normalizarRol, rutaPorRol } from "../utils/rolCompat";
 
 /**
  * Componente Login
@@ -54,28 +55,37 @@ const Login = ({ onLogin }) => {
       }
 
       const id_usuario = data?.usuario?.id_usuario;
-      const rol = data?.usuario?.rol; // <-- Recuperamos el rol del JSON
+      const rol = normalizarRol(data?.usuario?.rol);
 
       if (!id_usuario || !rol) {
         setMensaje("❌ Respuesta inválida del servidor.");
         return;
       }
 
-      // Guardamos la info en el localStorage para que RutaProtegida lo lea
-      localStorage.setItem("id_usuario", String(id_usuario));
-      localStorage.setItem("rol", rol);
-      localStorage.setItem("nombre", data.usuario.nombre);
+      const destino = rutaPorRol(rol);
+      if (!destino) {
+        setMensaje(`❌ Rol no reconocido: "${data?.usuario?.rol}".`);
+        return;
+      }
+
+      const usuarioSesion = {
+        id_usuario: String(id_usuario),
+        rol,
+        nombre: data.usuario.nombre,
+        apellido: data.usuario.apellido,
+        email: data.usuario.email,
+      };
+
+      localStorage.setItem("id_usuario", usuarioSesion.id_usuario);
+      localStorage.setItem("rol", usuarioSesion.rol);
+      localStorage.setItem("nombre", usuarioSesion.nombre);
+
+      if (typeof onLogin === "function") {
+        onLogin(usuarioSesion);
+      }
 
       setMensaje("✅ Inicio de sesión exitoso. Redirigiendo...");
-
-      // Redirección inteligente basada en el rol
-      if (rol === "Administrador") {
-        navigate("/admin");
-      } else if (rol === "Profesional") {
-        navigate("/medico");
-      } else {
-        setMensaje("❌ Rol no reconocido.");
-      }
+      navigate(destino, { replace: true });
       
     } catch (error) {
       console.error("Error en autenticación:", error);

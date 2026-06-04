@@ -66,7 +66,14 @@ function AppContent() {
       {/* SISTEMA DE RUTAS */}
       <Routes>
         {/* RUTA PÚBLICA */}
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={
+            <Login
+              onLogin={(usuarioSesion) => setUsuario(usuarioSesion)}
+            />
+          }
+        />
 
         {/* RUTAS DEL PROFESIONAL (MÉDICO) */}
         <Route element={<RutaProtegida rolesPermitidos={["Profesional"]} />}>

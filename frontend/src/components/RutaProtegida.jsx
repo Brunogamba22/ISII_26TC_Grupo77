@@ -1,4 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { normalizarRol } from "../utils/rolCompat";
 
 /**
  * Componente Wrapper para proteger rutas según el rol.
@@ -6,7 +7,7 @@ import { Navigate, Outlet } from "react-router-dom";
  */
 const RutaProtegida = ({ rolesPermitidos }) => {
   const idUsuario = localStorage.getItem("id_usuario");
-  const rolUsuario = localStorage.getItem("rol");
+  const rolUsuario = normalizarRol(localStorage.getItem("rol"));
 
   // Si no hay usuario logueado, lo mandamos al Login
   if (!idUsuario) {

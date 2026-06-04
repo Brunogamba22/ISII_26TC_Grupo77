@@ -30,7 +30,7 @@ let guardias = [
 // Solicitudes de reemplazo/cambio. Se completa vía `crearSolicitudDeCambio` y se guarda en memoria.
 const reemplazos = [];
 
-// Sesiones activas (registro simple) para el flujo de login del ejercicio.
+// Sesiones activas: trazabilidad del CU "Iniciar Sesión" (authController las registra).
 const sesionesActivas = [];
 
 module.exports = { usuarios, guardias, reemplazos, sesionesActivas };
