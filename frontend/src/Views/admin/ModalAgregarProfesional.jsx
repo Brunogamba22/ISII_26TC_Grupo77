@@ -1,4 +1,4 @@
-'use client';
+
 
 import { Shield, X, User, Mail, Lock, Stethoscope, Briefcase, Loader2 } from 'lucide-react';
 
