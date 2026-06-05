@@ -12,6 +12,7 @@ import VistaInicio from './pages/VistaInicio';
 import VistaAgenda from './pages/VistaAgenda';
 import VistaPerfil from './pages/VistaPerfil';
 import VistaReemplazos from './pages/VistaReemplazos';
+import '../../styles/profesional.css'
 
 // Panel Profesional Principal
 export default function ProfesionalPanel() {

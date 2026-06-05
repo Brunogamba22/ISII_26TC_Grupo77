@@ -1,0 +1,458 @@
+/* ====================================
+   Panel Profesional - Estilos específicos
+   Reutiliza la estética del panel administrador
+   ==================================== */
+
+/* Layout Principal del Panel */
+.profesional-panel {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f0f7ff;
+  }
+  
+  .profesional-content {
+    flex: 1;
+    padding: 24px;
+    margin-left: 260px;
+    transition: margin-left 0.3s ease;
+  }
+  
+  /* ====================================
+     Sidebar Profesional
+     ==================================== */
+  .sidebar-profesional {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    background: linear-gradient(180deg, #0078d4 0%, #005a9e 100%);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar-logo {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .sidebar-logo-icon {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0078d4;
+  }
+  
+  .sidebar-logo-text {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  
+  .sidebar-nav {
+    padding: 16px 12px;
+    flex: 1;
+  }
+  
+  .sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    font-weight: 500;
+  }
+  
+  .sidebar-nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  .sidebar-nav-item.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 600;
+  }
+  
+  .sidebar-nav-item svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+  
+  /* ====================================
+     Header Profesional
+     ==================================== */
+  .header-profesional {
+    margin-bottom: 24px;
+  }
+  
+  .header-saludo {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
+  }
+  
+  .header-saludo span {
+    color: #0078d4;
+  }
+  
+  /* ====================================
+     Cards de Guardias
+     ==================================== */
+  .guardias-section {
+    margin-bottom: 32px;
+  }
+  
+  .guardias-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 16px;
+  }
+  
+  .guardias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .guardia-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  
+  .guardia-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .guardia-fecha {
+    font-size: 32px;
+    font-weight: 700;
+    color: #0078d4;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  
+  .guardia-mes {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0078d4;
+  }
+  
+  .guardia-dia {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 12px;
+  }
+  
+  .guardia-horario {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    padding: 6px 12px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    display: inline-block;
+  }
+  
+  .guardia-especialidad {
+    font-size: 13px;
+    color: #0078d4;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  
+  .guardia-hospital {
+    font-size: 12px;
+    color: #6b7280;
+  }
+  
+  /* ====================================
+     Botones de Acción
+     ==================================== */
+  .botones-accion {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .btn-outline {
+    background: white;
+    color: #0078d4;
+    border: 2px solid #0078d4;
+  }
+  
+  .btn-outline:hover {
+    background: #e6f7ff;
+  }
+  
+  .btn-primary {
+    background: #0078d4;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background: #005a9e;
+  }
+  
+  /* ====================================
+     Tabla de Agenda
+     ==================================== */
+  .tabla-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+  }
+  
+  .tabla-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tabla-titulo {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .tabla {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .tabla th {
+    text-align: left;
+    padding: 14px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tabla td {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .tabla tr:hover {
+    background: #f9fafb;
+  }
+  
+  .estado-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .estado-confirmada {
+    background: #dcfce7;
+    color: #166534;
+  }
+  
+  .estado-pendiente {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  
+  .estado-cancelada {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  
+  /* ====================================
+     Formulario de Reemplazos
+     ==================================== */
+  .form-container {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  
+  .form-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 24px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #1f2937;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+  
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: #0078d4;
+    box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+  }
+  
+  .form-textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  
+  /* ====================================
+     Perfil Cards
+     ==================================== */
+  .perfil-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  
+  .perfil-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  
+  .perfil-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .perfil-card-icon {
+    width: 48px;
+    height: 48px;
+    background: #e6f7ff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0078d4;
+  }
+  
+  .perfil-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .perfil-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .perfil-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .perfil-info-label {
+    font-size: 13px;
+    color: #6b7280;
+  }
+  
+  .perfil-info-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1f2937;
+  }
+  
+  /* ====================================
+     Responsive
+     ==================================== */
+  @media (max-width: 768px) {
+    .sidebar-profesional {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+  
+    .profesional-content {
+      margin-left: 0;
+      padding: 16px;
+    }
+  
+    .guardias-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .botones-accion {
+      flex-direction: column;
+    }
+  
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
