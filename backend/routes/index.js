@@ -53,6 +53,6 @@ router.post("/api/asignacion/generar", asignarGuardiasAutomaticamente);
 router.get("/api/personal", obtenerPersonal);
 
 // Crear un nuevo profesional (médico)
-router.post("/api/personal", crearProfesional);
+router.post("/api/registro", crearProfesional);
 
 module.exports = router;

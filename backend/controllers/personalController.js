@@ -1,15 +1,17 @@
 const db = require("../models/db"); // Asegúrate de que esta ruta apunte a tu conexión real
-
+const bcrypt = require("bcryptjs"); 
 /**
  * Obtiene la lista de profesionales (rol 2) junto con el nombre de su especialidad
  */
 const obtenerPersonal = async (req, res) => {
   try {
     const query = `
-      SELECT u.id_usuario, u.nombre, u.apellido, u.email, e.tipoEspecialidad 
+      SELECT u.id_usuario, u.nombre, u.apellido, u.email, e.tipoEspecialidad, r.tipoRol AS rol
       FROM usuario u 
       INNER JOIN especialidad e ON u.id_especialidad = e.id_especialidad 
-      WHERE u.id_rol = 2
+      INNER JOIN rol r ON u.id_rol = r.id_rol
+      WHERE u.id_rol IN (2, 3)
+      ORDER BY u.id_usuario
     `;
     const [rows] = await db.query(query);
     
@@ -27,18 +29,32 @@ const crearProfesional = async (req, res) => {
   try {
     const { nombre, apellido, email, contrasena, id_especialidad, id_rol } = req.body;
 
-    // Validación de campos obligatorios
-    if (!nombre || !apellido || !email || !contrasena || !id_especialidad || !id_rol) {
-      return res.status(400).json({ error: "Todos los campos son obligatorios para registrar al profesional." });
+    const nombreLimpio = nombre?.trim();
+    const apellidoLimpio = apellido?.trim();
+    const emailLimpio = email?.trim();
+    const idEspecialidad = Number(id_especialidad);
+    const idRol = Number(id_rol);
+
+    if (!nombreLimpio || !apellidoLimpio || !emailLimpio || !contrasena || !idEspecialidad || !idRol) {
+      return res.status(400).json({ error: "Todos los campos son obligatorios." });
     }
 
-    // Inserción en la base de datos
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(contrasena, salt);
+
     const query = `
       INSERT INTO usuario (nombre, apellido, email, contrasena, id_especialidad, id_rol) 
       VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    const [result] = await db.query(query, [nombre, apellido, email, contrasena, id_especialidad, id_rol]);
+    const [result] = await db.query(query, [
+      nombreLimpio,
+      apellidoLimpio,
+      emailLimpio,
+      hashPassword,
+      idEspecialidad,
+      idRol
+    ]);
 
     res.status(201).json({
       mensaje: "Profesional agregado exitosamente.",
@@ -47,13 +63,10 @@ const crearProfesional = async (req, res) => {
 
   } catch (error) {
     console.error("❌ Error en crearProfesional:", error.message);
-    
-    // Capturar si el email ya existe (Violación de UNIQUE constraint en MySQL)
     if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(400).json({ error: "El correo electrónico ya se encuentra registrado." });
+      return res.status(400).json({ error: "El correo electrónico ya existe." });
     }
-
-    res.status(500).json({ error: "Error interno al registrar el profesional." });
+    res.status(500).json({ error: "Error interno al registrar." });
   }
 };
 
