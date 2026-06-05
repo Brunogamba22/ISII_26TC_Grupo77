@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Login from "./Views/Login";
-import GuardiasAsignadas from "./Views/GuardiasAsignadas";
-import SolicitudCambio from "./Views/SolicitudCambio";
+//import GuardiasAsignadas from "./Views/GuardiasAsignadas";
+//import SolicitudCambio from "./Views/SolicitudCambio";
 //import AsignacionAutomatica from "./Views/AsignacionAutomatica";
 import RutaProtegida from "./components/RutaProtegida"; // El componente que filtra por rol
 import AdminPanel from "./Views/admin/AdminPanel";
 import "./index.css";
 import "./styles/admin.css";
+
+
+//nueva ruta
+import ProfesionalPanel from "./Views/profesional/ProfesionalPanel";
 
 /**
  * Componente raíz de la app (Enrutador Principal).
@@ -71,16 +75,33 @@ function AppContent() {
 
         {/* RUTAS DEL PROFESIONAL (MÉDICO) */}
         <Route element={<RutaProtegida rolesPermitidos={["Profesional"]} />}>
+
+        <Route
+          path="/medico"
+          element={
+            <ProfesionalPanel
+              usuario={usuario}
+              guardias={guardias}
+              setGuardias={setGuardias}
+              guardiaSeleccionada={guardiaSeleccionada}
+              setGuardiaSeleccionada={setGuardiaSeleccionada}
+            />
+          }
+        />
+
+        </Route>
           
-          <Route path="/medico" element={
+        {/* <Route path="/medico" element={
             <GuardiasAsignadas 
               usuario={usuario} 
               onSeleccionarGuardia={handleSeleccionarGuardia} 
               onGuardiasCargadas={setGuardias}
             />
-          } />
+          } /> */}
 
-          <Route path="/medico/solicitud" element={
+
+
+         {/*} <Route path="/medico/solicitud" element={
             guardiaSeleccionada ? (
               <SolicitudCambio 
                 usuario={usuario}
@@ -95,7 +116,7 @@ function AppContent() {
               <Navigate to="/medico" replace />
             )
           } />
-        </Route>
+        </Route>*/}
 
         {/* RUTAS DEL ADMINISTRADOR */}
         <Route element={<RutaProtegida rolesPermitidos={["Administrador"]} />}>
