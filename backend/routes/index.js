@@ -13,6 +13,11 @@ const {
   crearSolicitudDeCambio,
 } = require("../controllers/solicitudController");
 
+const {
+  obtenerPersonal,
+  crearProfesional
+} = require("../controllers/personalController");
+
 /**
  * Router principal de la API.
  *
@@ -41,5 +46,13 @@ router.post("/api/asignacion/configurar", configurarParametrosDistribucion);
 
 // Generación: ejecuta el algoritmo de asignación automática (Contrato 4).
 router.post("/api/asignacion/generar", asignarGuardiasAutomaticamente);
+
+// --- RUTAS DE GESTIÓN DE PERSONAL (ADMINISTRADOR) ---
+
+// Obtener lista de profesionales con su especialidad
+router.get("/api/personal", obtenerPersonal);
+
+// Crear un nuevo profesional (médico)
+router.post("/api/personal", crearProfesional);
 
 module.exports = router;

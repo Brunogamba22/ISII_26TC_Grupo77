@@ -3,9 +3,11 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-route
 import Login from "./Views/Login";
 import GuardiasAsignadas from "./Views/GuardiasAsignadas";
 import SolicitudCambio from "./Views/SolicitudCambio";
-import AsignacionAutomatica from "./Views/AsignacionAutomatica";
+//import AsignacionAutomatica from "./Views/AsignacionAutomatica";
 import RutaProtegida from "./components/RutaProtegida"; // El componente que filtra por rol
-import "./App.css";
+import AdminPanel from "./Views/admin/AdminPanel";
+import "./index.css";
+import "./styles/admin.css";
 
 /**
  * Componente raíz de la app (Enrutador Principal).
@@ -53,15 +55,7 @@ function AppContent() {
 
   return (
     <div>
-      {/* HEADER GLOBAL (Solo visible si hay usuario) */}
-      {usuario && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#f1f5f9', marginBottom: '1rem' }}>
-          <strong>Panel de {usuario.rol}</strong>
-          <button className="logout-btn" onClick={handleLogout}>
-            Cerrar sesión ({usuario.nombre})
-          </button>
-        </div>
-      )}
+      
 
       {/* SISTEMA DE RUTAS */}
       <Routes>
@@ -106,7 +100,7 @@ function AppContent() {
         {/* RUTAS DEL ADMINISTRADOR */}
         <Route element={<RutaProtegida rolesPermitidos={["Administrador"]} />}>
           <Route path="/admin" element={
-            <AsignacionAutomatica onVolver={() => navigate("/admin")} />
+            <AdminPanel onVolver={() => navigate("/admin")} />
           } />
         </Route>
 

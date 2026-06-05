@@ -1,28 +1,29 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { normalizarRol } from "../utils/rolCompat";
 
-/**
- * Componente Wrapper para proteger rutas según el rol.
- * @param {Array} rolesPermitidos - Array de strings con los roles que pueden pasar.
- */
 const RutaProtegida = ({ rolesPermitidos }) => {
   const idUsuario = localStorage.getItem("id_usuario");
-  const rolUsuario = normalizarRol(localStorage.getItem("rol"));
+  const rolRaw = localStorage.getItem("rol");
+  const rolUsuario = normalizarRol(rolRaw);
 
-  // Si no hay usuario logueado, lo mandamos al Login
+  // 1. Si no hay sesión, siempre al login
   if (!idUsuario) {
     return <Navigate to="/login" replace />;
   }
 
-  // Si el usuario está logueado pero NO tiene un rol permitido para esta ruta
-  if (rolesPermitidos && !rolesPermitidos.includes(rolUsuario)) {
-    // Redirigir según su rol (o a una página de "Acceso Denegado")
-    if (rolUsuario === "Administrador") return <Navigate to="/admin" replace />;
-    if (rolUsuario === "Profesional") return <Navigate to="/medico" replace />;
+  // 2. Si el usuario existe pero el rol es nulo o inválido, cerrar sesión forzosa
+  if (!rolUsuario) {
+    localStorage.clear();
     return <Navigate to="/login" replace />;
   }
 
-  // Si pasa las validaciones, renderiza los componentes hijos (las rutas internas)
+  // 3. Validación de permisos
+  if (rolesPermitidos && !rolesPermitidos.includes(rolUsuario)) {
+    // Redirigir según su rol real en lugar de permitirle acceso no autorizado
+    return <Navigate to={rolUsuario === "Administrador" ? "/admin" : "/medico"} replace />;
+  }
+
+  // Todo correcto, mostrar la ruta
   return <Outlet />;
 };
 
