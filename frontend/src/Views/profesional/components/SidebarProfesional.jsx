@@ -9,7 +9,7 @@ function SidebarProfesional({ vistaActiva, setVistaActiva }) {
   const navItems = [
     { id: 'inicio', label: 'Inicio', icon: Home },
     { id: 'agenda', label: 'Mi Agenda', icon: Calendar },
-    { id: 'reemplazos', label: 'Gestión de Reemplazos', icon: RefreshCw },
+    { id: 'guardias', label: 'Mis Guardias', icon: RefreshCw },
     { id: 'perfil', label: 'Mi Perfil', icon: User },
   ]
 

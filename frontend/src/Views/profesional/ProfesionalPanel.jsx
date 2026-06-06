@@ -11,8 +11,9 @@ import {
 import VistaInicio from './pages/VistaInicio';
 import VistaAgenda from './pages/VistaAgenda';
 import VistaPerfil from './pages/VistaPerfil';
-import VistaReemplazos from './pages/VistaReemplazos';
+import VistaGuardias from './pages/VistaGuardias';
 import '../../styles/profesional.css'
+
 
 // Panel Profesional Principal
 export default function ProfesionalPanel() {
@@ -22,7 +23,7 @@ export default function ProfesionalPanel() {
   const menuItems = [
     { id: 'inicio', label: 'Inicio', icon: Home },
     { id: 'agenda', label: 'Mi Agenda', icon: Calendar },
-    { id: 'reemplazos', label: 'Gestión de Reemplazos', icon: RefreshCw },
+    { id: 'guardias', label: 'Mis Guardias', icon: RefreshCw },
     { id: 'perfil', label: 'Mi Perfil', icon: User },
   ];
 
@@ -30,13 +31,17 @@ export default function ProfesionalPanel() {
   const renderVista = () => {
     switch (vistaActiva) {
       case 'inicio':
-        return <VistaInicio />;
+        return (
+          <VistaInicio
+            setVistaActiva={setVistaActiva}
+          />
+        );
 
       case 'agenda':
         return <VistaAgenda />;
 
-      case 'reemplazos':
-        return <VistaReemplazos />;
+      case 'guardias':
+        return <VistaGuardias />;
 
       case 'perfil':
         return <VistaPerfil />;

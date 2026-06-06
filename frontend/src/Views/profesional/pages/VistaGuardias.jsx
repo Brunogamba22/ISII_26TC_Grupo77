@@ -3,7 +3,7 @@ import { useState } from "react";
 import GuardiasAsignadas from "../components/GuardiasAsignadas";
 import SolicitudCambio from "../components/SolicitudCambio";
 
-function VistaReemplazos() {
+function VistaGuardias() {
 
   const id_usuario =
     localStorage.getItem("id_usuario");
@@ -64,4 +64,4 @@ function VistaReemplazos() {
   );
 }
 
-export default VistaReemplazos;
+export default VistaGuardias;
