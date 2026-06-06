@@ -20,7 +20,7 @@ const RutaProtegida = ({ rolesPermitidos }) => {
   // 3. Validación de permisos
   if (rolesPermitidos && !rolesPermitidos.includes(rolUsuario)) {
     // Redirigir según su rol real en lugar de permitirle acceso no autorizado
-    return <Navigate to={rolUsuario === "Administrador" ? "/admin" : "/medico"} replace />;
+    return <Navigate to={rolUsuario === "Administrador" ? "/admin/personal" : "/medico"} replace />;
   }
 
   // Todo correcto, mostrar la ruta

@@ -3,9 +3,13 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-route
 import Login from "./Views/Login";
 //import GuardiasAsignadas from "./Views/GuardiasAsignadas";
 //import SolicitudCambio from "./Views/SolicitudCambio";
-//import AsignacionAutomatica from "./Views/AsignacionAutomatica";
 import RutaProtegida from "./components/RutaProtegida"; // El componente que filtra por rol
 import AdminPanel from "./Views/admin/AdminPanel";
+import VistaPersonal from "./Views/admin/pages/VistaPersonal";
+import VistaEspecialidades from "./Views/admin/pages/VistaEspecialidades";
+import VistaCalendario from "./Views/admin/pages/VistaCalendario";
+import VistaAprobaciones from "./Views/admin/pages/VistaAprobaciones";
+import VistaAsignacionAutomatica from "./Views/admin/pages/VistaAsignacionAutomatica";
 import "./index.css";
 import "./styles/admin.css";
 
@@ -120,9 +124,14 @@ function AppContent() {
 
         {/* RUTAS DEL ADMINISTRADOR */}
         <Route element={<RutaProtegida rolesPermitidos={["Administrador"]} />}>
-          <Route path="/admin" element={
-            <AdminPanel onVolver={() => navigate("/admin")} />
-          } />
+          <Route path="/admin" element={<AdminPanel />}>
+            <Route index element={<Navigate to="personal" replace />} />
+            <Route path="personal" element={<VistaPersonal />} />
+            <Route path="especialidades" element={<VistaEspecialidades />} />
+            <Route path="calendario" element={<VistaCalendario />} />
+            <Route path="aprobaciones" element={<VistaAprobaciones />} />
+            <Route path="asignacion" element={<VistaAsignacionAutomatica />} />
+          </Route>
         </Route>
 
         {/* REDIRECCIÓN POR DEFECTO */}

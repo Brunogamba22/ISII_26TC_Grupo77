@@ -1,6 +1,4 @@
-
-
-import { Shield, X, User, Mail, Lock, Stethoscope, Briefcase, Loader2 } from 'lucide-react';
+import { X, User, Mail, Lock, Stethoscope, Briefcase, Loader2 } from 'lucide-react';
 
 export default function ModalAgregarProfesional({
   isOpen = false,
@@ -16,7 +14,7 @@ export default function ModalAgregarProfesional({
     id_rol: '',
   },
   onFieldChange,
-  especialidades = [], 
+  especialidades = [],
   roles = [],
   error = '',
 }) {
@@ -43,7 +41,6 @@ export default function ModalAgregarProfesional({
       onClick={handleBackdropClick}
     >
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-lg transform transition-all overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div>
             <h2 className="text-xl font-semibold text-gray-800">Agregar Profesional</h2>
@@ -59,7 +56,6 @@ export default function ModalAgregarProfesional({
           </button>
         </div>
 
-        {/* Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3">
@@ -67,7 +63,6 @@ export default function ModalAgregarProfesional({
             </div>
           )}
 
-          {/* Dos columnas para Nombre y Apellido */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label htmlFor="nombre" className="block text-xs font-medium text-gray-700">Nombre</label>
@@ -106,7 +101,6 @@ export default function ModalAgregarProfesional({
             </div>
           </div>
 
-          {/* Email */}
           <div className="space-y-1">
             <label htmlFor="modal-email" className="block text-xs font-medium text-gray-700">Correo electrónico</label>
             <div className="relative">
@@ -125,7 +119,6 @@ export default function ModalAgregarProfesional({
             </div>
           </div>
 
-          {/* Contraseña */}
           <div className="space-y-1">
             <label htmlFor="password" className="block text-xs font-medium text-gray-700">Contraseña inicial</label>
             <div className="relative">
@@ -144,9 +137,7 @@ export default function ModalAgregarProfesional({
             </div>
           </div>
 
-          {/* Especialidad y Rol en dos columnas */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Especialidad */}
             <div className="space-y-1">
               <label htmlFor="especialidad" className="block text-xs font-medium text-gray-700">Especialidad</label>
               <div className="relative">
@@ -161,16 +152,15 @@ export default function ModalAgregarProfesional({
                   className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <option value="">Seleccionar...</option>
-                  {especialidades && especialidades.map((esp) => (
+                  {especialidades.map((esp) => (
                     <option key={esp.id_especialidad} value={esp.id_especialidad}>
-                      {esp.descripcion} {/* <-- 🛠️ CORREGIDO: Llamamos a .descripcion y no al objeto completo */}
+                      {esp.descripcion}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* Rol */}
             <div className="space-y-1">
               <label htmlFor="rol" className="block text-xs font-medium text-gray-700">Rol</label>
               <div className="relative">
@@ -185,9 +175,9 @@ export default function ModalAgregarProfesional({
                   className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <option value="">Seleccionar...</option>
-                  {roles && roles.map((r) => (
+                  {roles.map((r) => (
                     <option key={r.id_rol} value={r.id_rol}>
-                      {r.nombre_rol} {/* <-- 🛠️ CORREGIDO: Llamamos a .nombre_rol */}
+                      {r.nombre_rol}
                     </option>
                   ))}
                 </select>
@@ -195,7 +185,6 @@ export default function ModalAgregarProfesional({
             </div>
           </div>
 
-          {/* Footer con botones */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
             <button
               type="button"

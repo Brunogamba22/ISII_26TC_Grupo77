@@ -15,7 +15,7 @@ export function normalizarRol(rol) {
 
 export function rutaPorRol(rol) {
   const normalizado = normalizarRol(rol);
-  if (normalizado === "Administrador") return "/admin";
+  if (normalizado === "Administrador") return "/admin/personal";
   if (normalizado === "Profesional") return "/medico";
   return null;
 }
