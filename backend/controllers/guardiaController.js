@@ -1,4 +1,4 @@
-const { guardias } = require("../models/datos"); // Conservado del Sprint 1
+
 const db = require("../models/db"); // Tu Singleton de conexión a MySQL
 const MotorDeAsignacion = require('../estrategias/MotorDeAsignacion');
 const AsignacionEquitativa = require('../estrategias/AsignacionEquitativa');
@@ -7,19 +7,46 @@ const AsignacionEquitativa = require('../estrategias/AsignacionEquitativa');
  * Controlador: consulta guardias asignadas a un profesional.
  * (Sprint 1 - Datos simulados en memoria)
  */
-function consultarGuardiasAsignadas(req, res) {
-  const { id_usuario } = req.params;
+async function consultarGuardiasAsignadas(req, res) {
+  try {
+    const { id_usuario } = req.params;
 
-  // Normaliza a número para evitar discrepancies string/number al comparar IDs.
-  const guardiasAsignadas = guardias.filter(
-    (g) => Number(g.id_usuario) === Number(id_usuario)
-  );
+    const [guardias] = await db.query(
+      `
+      SELECT 
+        id_guardia,
+        fecha,
+        hora_inicio,
+        hora_fin,
+        estado
+      FROM guardia
+      WHERE id_usuario = ?
+      ORDER BY fecha ASC
+      `,
+      [id_usuario]
+    );
 
-  if (guardiasAsignadas.length === 0) {
-    return res.status(404).json({ mensaje: "No hay guardias asignadas" });
+    if (guardias.length === 0) {
+      return res.status(404).json({
+        mensaje: "No hay guardias asignadas",
+      });
+    }
+
+    return res.status(200).json({
+      guardias,
+    });
+
+  } catch (error) {
+    console.error(
+      "Error al consultar guardias:",
+      error
+    );
+
+    return res.status(500).json({
+      error:
+        "Error interno al consultar guardias",
+    });
   }
-
-  return res.status(200).json({ guardias: guardiasAsignadas });
 }
 
 
@@ -59,11 +86,11 @@ async function asignarGuardiasAutomaticamente(req, res) {
     const turnosGenerados = motor.ejecutar(profesionales, diasDelMes);
 
     // VALIDAR DUPLICADOS
-    //const [guardiasExistentes] = await db.query(
-    //  `SELECT * FROM guardia
-    //  WHERE id_calendario = ?`,
-    //  [id_calendario]
-    //);
+    const [guardiasExistentes] = await db.query(
+      `SELECT * FROM guardia
+      WHERE id_calendario = ?`,
+      [id_calendario]
+    );
 
     if (guardiasExistentes.length > 0) {
       return res.status(400).json({
