@@ -12,7 +12,6 @@ import VistaInicio from './pages/VistaInicio';
 import VistaAgenda from './pages/VistaAgenda';
 import VistaPerfil from './pages/VistaPerfil';
 import VistaReemplazos from './pages/VistaReemplazos';
-import PanelLayout from '../../components/shared/PanelLayout';
 import '../../styles/profesional.css'
 
 // Panel Profesional Principal
@@ -47,7 +46,10 @@ export default function ProfesionalPanel() {
     }
   };
 
-  const sidebar = (
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-cyan-50 flex">
+
+      {/* Sidebar */}
       <aside className="w-72 bg-gradient-to-b from-cyan-100 to-cyan-50 min-h-screen p-4 flex flex-col shadow-lg">
 
         {/* Logo */}
@@ -94,11 +96,11 @@ export default function ProfesionalPanel() {
           })}
         </nav>
       </aside>
-  );
 
-  return (
-    <PanelLayout sidebar={sidebar}>
-      <div className="p-8">{renderVista()}</div>
-    </PanelLayout>
+      {/* Contenido Principal */}
+      <main className="flex-1 overflow-auto p-8">
+        {renderVista()}
+      </main>
+    </div>
   );
 }

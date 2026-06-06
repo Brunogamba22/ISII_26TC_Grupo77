@@ -1,76 +1,78 @@
-// Path: src/Views/profesional/pages/VistaInicio.jsx
-// Vista de inicio del Panel Profesional
-// Replica exactamente el mockup con saludo, cards de guardias y botones
+// Path: src/Views/profesional/pages/VistaReemplazos.jsx
 
-import HeaderProfesional from '../components/HeaderProfesional.jsx'
-import GuardiasCard from '../components/GuardiasCard.jsx'
-import BotonesAccion from '../components/BotonesAccion.jsx'
+import { useState } from "react";
 
-function VistaInicio() {
-  // Datos del profesional
-  const nombreDoctor = 'Alex Pérez'
+import GuardiasAsignadas from "../components/GuardiasAsignadas";
+import SolicitudCambio from "../components/SolicitudCambio";
 
-  // Datos de las próximas guardias (según mockup)
-  const proximasGuardias = [
-    {
-      dia: '12',
-      mes: 'May',
-      diaSemana: 'Jueves',
-      horario: '08:00 - 20:00',
-      especialidad: 'Urgencias Generales',
-      hospital: '- Hosp. Central'
-    },
-    {
-      dia: '14',
-      mes: 'May',
-      diaSemana: 'Sábado',
-      horario: '20:00 - 08:00 (Sig.)',
-      especialidad: 'Pediatría',
-      hospital: '- Clínica Materno'
-    },
-    {
-      dia: '15',
-      mes: 'May',
-      diaSemana: 'Domingo',
-      horario: '12:00 - 20:00',
-      especialidad: 'Medicina Interna',
-      hospital: '- Hosp. Central'
-    }
-  ]
+/**
+ * VistaReemplazos
+ *
+ * Responsabilidad:
+ * Orquestar el flujo completo del Caso de Uso:
+ * "Solicitar Cambio de Guardia".
+ *
+ * Mantiene desacoplados:
+ * - selección de guardias
+ * - formulario de solicitud
+ *
+ * Esto mejora:
+ * - cohesión
+ * - reutilización
+ * - mantenibilidad
+ * - trazabilidad con documentación
+ */
+function VistaReemplazos() {
 
-  // Handlers para los botones de acción
-  const handleSolicitarCambio = () => {
-    alert('Funcionalidad: Solicitar cambio de guardia')
-  }
+  /**
+   * Usuario autenticado.
+   * Actualmente se obtiene desde localStorage
+   * para mantener compatibilidad con Login existente.
+   */
+  const usuario = {
+    id_usuario: localStorage.getItem("id_usuario"),
+    nombre: localStorage.getItem("nombre"),
+    rol: localStorage.getItem("rol"),
+  };
 
-  const handleConfirmarAsistencia = () => {
-    alert('Asistencia confirmada correctamente')
-  }
+  /**
+   * Lista de guardias recuperadas desde backend.
+   * Se comparte entre componentes para evitar doble fetch.
+   */
+  const [guardias, setGuardias] = useState([]);
 
+  /**
+   * Guardia seleccionada para solicitar reemplazo.
+   */
+  const [guardiaSeleccionada, setGuardiaSeleccionada] = useState(null);
+
+  /**
+   * Si existe una guardia seleccionada:
+   * mostramos formulario de solicitud.
+   *
+   * Caso contrario:
+   * mostramos listado de guardias.
+   */
   return (
-    <div className="vista-inicio">
-      {/* Header con saludo */}
-      <HeaderProfesional nombreDoctor={nombreDoctor} />
+    <div className="space-y-6">
 
-      {/* Sección de próximas guardias */}
-      <section className="guardias-section">
-        <h2 className="guardias-title">Mis Próximas Guardias</h2>
-        
-        {/* Grid de cards de guardias */}
-        <div className="guardias-grid">
-          {proximasGuardias.map((guardia, index) => (
-            <GuardiasCard key={index} guardia={guardia} />
-          ))}
-        </div>
-
-        {/* Botones de acción */}
-        <BotonesAccion 
-          onSolicitarCambio={handleSolicitarCambio}
-          onConfirmarAsistencia={handleConfirmarAsistencia}
+      {!guardiaSeleccionada ? (
+        <GuardiasAsignadas
+          usuario={usuario}
+          onSeleccionarGuardia={setGuardiaSeleccionada}
+          onGuardiasCargadas={setGuardias}
         />
-      </section>
+      ) : (
+        <SolicitudCambio
+          usuario={usuario}
+          guardiaSeleccionada={guardiaSeleccionada}
+          guardias={guardias}
+          onCancelar={() => setGuardiaSeleccionada(null)}
+        />
+      )}
+
     </div>
-  )
+  );
 }
 
-export default VistaInicio
+export default VistaReemplazos;
