@@ -12,63 +12,29 @@ export function useAsignacionAutomatica() {
   const [turnosGenerados, setTurnosGenerados] = useState([]);
   const [cargando, setCargando] = useState(false);
 
-  const handleGenerar = async () => {
-    setMensaje('');
-
-    if (!mes || !anio) {
-      setMensaje('❌ Debe completar mes y año.');
-      return;
-    }
-
-    if (anio < 2025) {
-      setMensaje('❌ El año debe ser válido.');
-      return;
-    }
-
-    const confirmado = window.confirm('¿Desea generar automáticamente las guardias?');
-    if (!confirmado) return;
-
+  const handleGenerar = async (datosConfig) => { // Recibe el objeto con mes, anio, etc.
     setCargando(true);
-    setTurnosGenerados([]);
-
+    setMensaje('');
     try {
-      const configuracion = await asignacionService.configurar({
-        mes,
-        anio,
-        reglasEquidad: {
-          maxGuardiasConsecutivas,
-          equidadFinesSemana,
-          evitarEspecialidadesCriticas,
-          observaciones,
-        },
-      });
+      // 1. Configurar
+      const configRes = await asignacionService.configurar(datosConfig);
+      if (!configRes.response.ok) throw new Error(configRes.data?.error || 'Error configurando.');
 
-      if (!configuracion.response.ok) {
-        setMensaje(configuracion.data?.error || '❌ Error configurando parámetros.');
-        return;
-      }
-
-      const id_calendario = configuracion.data.id_calendario;
-      const diasDelMes = new Date(anio, mes, 0).getDate();
-
-      const generacion = await asignacionService.generar({
-        id_calendario,
-        diasDelMes,
+      // 2. Generar
+      const genRes = await asignacionService.generar({
+        id_calendario: configRes.data.id_calendario,
+        diasDelMes: new Date(datosConfig.anio, datosConfig.mes, 0).getDate(),
         id_especialidad: 1,
-        anio,
-        mes,
+        anio: datosConfig.anio,
+        mes: datosConfig.mes
       });
 
-      if (!generacion.response.ok) {
-        setMensaje(generacion.data?.error || '❌ Error generando guardias.');
-        return;
-      }
-
+      if (!genRes.response.ok) throw new Error(genRes.data?.error || 'Error generando.');
+      
+      setTurnosGenerados(genRes.data.turnos || []);
       setMensaje('✅ Guardias generadas correctamente.');
-      setTurnosGenerados(generacion.data.turnos || []);
-    } catch (error) {
-      console.error(error);
-      setMensaje('❌ Error de conexión con el servidor.');
+    } catch (err) {
+      setMensaje(err.message);
     } finally {
       setCargando(false);
     }
