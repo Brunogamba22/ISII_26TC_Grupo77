@@ -1,64 +1,51 @@
+// src/Views/profesional/components/GuardiasAsignadas.jsx
+
 import { useState, useEffect } from "react";
 import { apiRequest } from "../../../apiClient";
-import {
-  formatFechaYYYYMMDDToDDMMYYYY,
-  formatHorarioHHMMToHHMM,
-} from "../../../utils/formatters";
+import GuardiasCard from "./GuardiasCard";
 
+/**
+ * Componente que obtiene las guardias de un profesional y permite seleccionar una.
+ *
+ * Props:
+ * @param {string} id_usuario         - ID del usuario autenticado.
+ * @param {function} onSeleccionarGuardia - Callback que recibe la guardia seleccionada.
+ * @param {function} onGuardiasCargadas   - Callback que recibe la lista de guardias (para el padre).
+ */
 const GuardiasAsignadas = ({
   id_usuario,
   onSeleccionarGuardia,
   onGuardiasCargadas,
 }) => {
-
   const [guardias, setGuardias] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
-  const [guardiaSeleccionadaId, setGuardiaSeleccionadaId] =
-    useState(null);
+  const [guardiaSeleccionadaId, setGuardiaSeleccionadaId] = useState(null);
 
+  // Efecto para cargar las guardias al montar o cuando cambia el id_usuario
   useEffect(() => {
-
     const cargarGuardias = async () => {
-
       try {
-
         setCargando(true);
         setError("");
 
-        const { response, data } =
-          await apiRequest(
-            `/guardias/${id_usuario}`
-          );
+        const { response, data } = await apiRequest(`/guardias/${id_usuario}`);
 
         if (!response.ok) {
-
-          setError(
-            data?.mensaje ||
-            "No se pudieron cargar las guardias"
-          );
-
+          setError(data?.mensaje || "No se pudieron cargar las guardias");
           return;
         }
 
         const lista = data?.guardias || [];
-
         setGuardias(lista);
 
         if (onGuardiasCargadas) {
           onGuardiasCargadas(lista);
         }
-
-      } catch (error) {
-
-        console.error(error);
-
-        setError(
-          "Error al cargar guardias"
-        );
-
+      } catch (err) {
+        console.error(err);
+        setError("Error al cargar guardias");
       } finally {
-
         setCargando(false);
       }
     };
@@ -66,136 +53,77 @@ const GuardiasAsignadas = ({
     if (id_usuario) {
       cargarGuardias();
     }
+  }, [id_usuario, onGuardiasCargadas]); // Incluimos onGuardiasCargadas en deps por seguridad
 
-  }, [id_usuario]);
-
+  // La guardia completa seleccionada (objeto entero)
   const guardiaSeleccionada =
     guardias.find(
-      (g) =>
-        Number(g.id_guardia) ===
-        Number(guardiaSeleccionadaId)
-    );
+      (g) => Number(g.id_guardia) === Number(guardiaSeleccionadaId)
+    ) || null;
 
+  // Renderizado condicional: carga, error o contenido
   if (cargando) {
     return (
-      <div className="text-slate-500">
-        Cargando guardias...
+      <div className="flex justify-center items-center py-20">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-gray-600">Cargando guardias...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-100 text-red-700 p-4 rounded-2xl">
+      <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl">
         {error}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-
+    <div className="space-y-8">
+      {/* Cabecera de la sección */}
       <header>
-        <h1 className="text-4xl font-bold text-slate-800">
+        <h1 className="text-3xl font-bold text-gray-800">
           Gestión de Reemplazos
         </h1>
-
-        <p className="text-slate-500 mt-2">
-          Seleccione una guardia para solicitar reemplazo
+        <p className="text-gray-500 mt-2">
+          Selecciona una guardia para solicitar un cambio de turno.
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
+      {/* Cuadrícula de tarjetas de guardias */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         {guardias.map((guardia) => {
-
           const seleccionada =
-            Number(guardia.id_guardia) ===
-            Number(guardiaSeleccionadaId);
+            Number(guardia.id_guardia) === Number(guardiaSeleccionadaId);
 
           return (
             <div
               key={guardia.id_guardia}
-              onClick={() =>
-                setGuardiaSeleccionadaId(
-                  guardia.id_guardia
-                )
-              }
-              className={`
-                p-6 rounded-3xl border cursor-pointer
-                transition-all duration-200
-                hover:shadow-lg
-                ${
-                  seleccionada
-                    ? "border-cyan-500 bg-cyan-50"
-                    : "border-slate-200 bg-white"
-                }
-              `}
+              onClick={() => setGuardiaSeleccionadaId(guardia.id_guardia)}
+              className={`cursor-pointer transition-all duration-200 transform hover:scale-[1.02] ${
+                seleccionada ? "ring-2 ring-blue-500 rounded-2xl" : ""
+              }`}
             >
-
-              <div className="flex justify-between items-start">
-
-                <div>
-
-                  <h2 className="text-2xl font-bold text-cyan-700">
-                    {
-                      formatFechaYYYYMMDDToDDMMYYYY(
-                        guardia.fecha
-                      )
-                    }
-                  </h2>
-
-                  <p className="text-slate-500 mt-2">
-                    Guardia #
-                    {guardia.id_guardia}
-                  </p>
-
-                </div>
-
-                <div className="text-3xl">
-                  {
-                    seleccionada
-                      ? "✅"
-                      : "📅"
-                  }
-                </div>
-
-              </div>
-
-              <div className="mt-4 inline-block bg-slate-100 px-4 py-2 rounded-xl">
-
-                {
-                  formatHorarioHHMMToHHMM(
-                    guardia.hora_inicio
-                  )
-                }
-
-              </div>
-
+              <GuardiasCard guardia={guardia} />
             </div>
           );
         })}
-
       </div>
 
-      <button
-        disabled={!guardiaSeleccionada}
-        onClick={() =>
-          onSeleccionarGuardia(
-            guardiaSeleccionada
-          )
-        }
-        className="
-          px-6 py-3 rounded-2xl
-          bg-cyan-600 text-white
-          hover:bg-cyan-700
-          disabled:bg-slate-300
-          font-semibold
-        "
-      >
-        Solicitar Cambio
-      </button>
-
+      {/* Botón de solicitar cambio (solo habilitado si hay selección) */}
+      <div className="flex justify-end">
+        <button
+          disabled={!guardiaSeleccionada}
+          onClick={() => onSeleccionarGuardia(guardiaSeleccionada)}
+          className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+          Solicitar Cambio
+        </button>
+      </div>
     </div>
   );
 };
