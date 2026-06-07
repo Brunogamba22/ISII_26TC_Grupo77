@@ -1,98 +1,75 @@
 import { useState } from 'react';
 import { asignacionService } from '../services/asignacionService';
+import { ANIO_MINIMO } from '../config/asignacionConstants';
+import { useFormularioAsignacion } from './useFormularioAsignacion';
 
 export function useAsignacionAutomatica() {
-  const [mes, setMes] = useState('');
-  const [anio, setAnio] = useState(new Date().getFullYear());
-  const [maxGuardiasConsecutivas, setMaxGuardiasConsecutivas] = useState(3);
-  const [equidadFinesSemana, setEquidadFinesSemana] = useState(true);
-  const [evitarEspecialidadesCriticas, setEvitarEspecialidadesCriticas] = useState(true);
-  const [observaciones, setObservaciones] = useState('');
-  const [especialidadSeleccionada, setEspecialidadSeleccionada] = useState('');
+  const { formulario, actualizarCampo } = useFormularioAsignacion();
 
-  const [mensaje, setMensaje] = useState('');
+  const [feedback, setFeedback] = useState({ tipo: null, texto: '' });
   const [turnosGenerados, setTurnosGenerados] = useState([]);
   const [cargando, setCargando] = useState(false);
 
-  const handleGenerar = async () => {
-    setMensaje('');
+  const validar = () => {
+    const { mes, anio, especialidadSeleccionada } = formulario;
 
     if (!mes || !anio || !especialidadSeleccionada) {
-      setMensaje('❌ Debe completar mes, año y especialidad.');
+      return { ok: false, texto: 'Debe completar mes, año y especialidad.' };
+    }
+    if (anio < ANIO_MINIMO) {
+      return { ok: false, texto: 'El año debe ser válido.' };
+    }
+    return { ok: true };
+  };
+
+  const generar = async () => {
+    setFeedback({ tipo: null, texto: '' });
+
+    const validacion = validar();
+    if (!validacion.ok) {
+      setFeedback({ tipo: 'error', texto: validacion.texto });
       return;
     }
-
-    if (anio < 2025) {
-      setMensaje('❌ El año debe ser válido.');
-      return;
-    }
-
-    const confirmado = window.confirm('¿Desea generar automáticamente las guardias?');
-    if (!confirmado) return;
 
     setCargando(true);
     setTurnosGenerados([]);
 
     try {
-      // ==========================================
-      // PASO 1 -> CONFIGURAR PARAMETROS EN LA BD
-      // ==========================================
-      const resConfig = await asignacionService.configurar({
+      const { mes, anio, especialidadSeleccionada, ...reglas } = formulario;
+
+      const resultado = await asignacionService.ejecutarAsignacionCompleta({
         mes,
         anio,
-        reglasEquidad: {
-          maxGuardiasConsecutivas,
-          equidadFinesSemana,
-          evitarEspecialidadesCriticas,
-          observaciones,
+        id_especialidad: especialidadSeleccionada,
+        reglas: {
+          maxGuardiasConsecutivas: reglas.maxGuardiasConsecutivas,
+          equidadFinesSemana: reglas.equidadFinesSemana,
+          evitarEspecialidadesCriticas: reglas.evitarEspecialidadesCriticas,
+          observaciones: reglas.observaciones,
         },
       });
 
-      if (!resConfig.response.ok) {
-        throw new Error(resConfig.data?.error || '❌ Error configurando parámetros.');
+      if (!resultado.ok) {
+        setFeedback({ tipo: 'error', texto: resultado.error });
+        return;
       }
 
-      const id_calendario = resConfig.data.id_calendario;
-      const diasDelMes = new Date(anio, Number(mes), 0).getDate();
-
-      // ==========================================
-      // PASO 2 -> EJECUTAR EL MOTOR DE ASIGNACIÓN
-      // ==========================================
-      const resGenerar = await asignacionService.generar({
-        id_calendario,
-        diasDelMes,
-        id_especialidad: Number(especialidadSeleccionada),
-        anio,
-        mes: Number(mes)
-      });
-
-      if (!resGenerar.response.ok) {
-        throw new Error(resGenerar.data?.error || '❌ Error generando guardias.');
-      }
-
-      // ÉXITO TOTAL
-      setMensaje('✅ Guardias generadas correctamente.');
-      setTurnosGenerados(resGenerar.data.turnos || []);
-
+      setFeedback({ tipo: 'success', texto: 'Guardias generadas correctamente.' });
+      setTurnosGenerados(resultado.turnos);
     } catch (error) {
       console.error(error);
-      setMensaje(error.message || '❌ Error de conexión con el servidor.');
+      setFeedback({ tipo: 'error', texto: 'Error de conexión con el servidor.' });
     } finally {
       setCargando(false);
     }
   };
 
   return {
-    mes, setMes,
-    anio, setAnio,
-    maxGuardiasConsecutivas, setMaxGuardiasConsecutivas,
-    equidadFinesSemana, setEquidadFinesSemana,
-    evitarEspecialidadesCriticas, setEvitarEspecialidadesCriticas,
-    observaciones, setObservaciones,
-    especialidadSeleccionada, setEspecialidadSeleccionada,
-    mensaje,
+    formulario,
+    actualizarCampo,
+    feedback,
     turnosGenerados,
     cargando,
-    handleGenerar,
+    generar,
   };
 }
