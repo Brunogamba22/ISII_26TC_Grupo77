@@ -1,6 +1,6 @@
 
-
-import { useState } from "react";
+import { apiRequest } from "../../../apiClient";
+import { useState, useEffect } from "react";
 
 import {
   CalendarDays,
@@ -17,7 +17,7 @@ export default function VistaInicio({
   const nombre =
     localStorage.getItem("nombre") ||
     "Profesional";
-
+  
   return (
     <div className="space-y-8">
 

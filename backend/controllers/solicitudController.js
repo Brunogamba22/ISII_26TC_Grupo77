@@ -19,31 +19,59 @@ async function crearSolicitudDeCambio(req, res) {
       });
     }
 
-    await db.query(
+        // Verificar si ya existe una solicitud pendiente
+    const [existente] = await db.query(
       `
-      INSERT INTO reemplazo
-      (
-        fecha_solicitud,
-        motivo,
-        estado,
-        id_guardia,
-        solicitante_id
-      )
-      VALUES
-      (
-        NOW(),
-        ?,
-        'pendiente',
-        ?,
-        ?
-      )
+      SELECT *
+      FROM reemplazo
+      WHERE id_guardia = ?
+      AND estado = 'pendiente'
       `,
-      [
-        motivo,
-        id_guardia,
-        id_usuario,
-      ]
+      [id_guardia]
     );
+
+    if (existente.length > 0) {
+      return res.status(400).json({
+        error: "Ya existe una solicitud pendiente para esta guardia",
+      });
+    }
+
+
+    await db.query(
+  `
+  INSERT INTO reemplazo
+  (
+    fecha_solicitud,
+    motivo,
+    estado,
+    id_guardia,
+    solicitante_id
+  )
+  VALUES
+  (
+    NOW(),
+    ?,
+    'pendiente',
+    ?,
+    ?
+  )
+  `,
+  [
+    motivo,
+    id_guardia,
+    id_usuario,
+  ]
+);
+
+// CAMBIAR ESTADO DE LA GUARDIA
+await db.query(
+  `
+  UPDATE guardia
+  SET estado = 'pendiente'
+  WHERE id_guardia = ?
+  `,
+  [id_guardia]
+);
 
     return res.status(201).json({
       mensaje:

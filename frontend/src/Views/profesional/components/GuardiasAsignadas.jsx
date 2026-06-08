@@ -16,6 +16,7 @@ const GuardiasAsignadas = ({
   id_usuario,
   onSeleccionarGuardia,
   onGuardiasCargadas,
+  irAlInicio,
 }) => {
   const [guardias, setGuardias] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -112,18 +113,60 @@ const GuardiasAsignadas = ({
       </div>
 
       {/* Botón de solicitar cambio (solo habilitado si hay selección) */}
-      <div className="flex justify-end">
-        <button
-          disabled={!guardiaSeleccionada}
-          onClick={() => onSeleccionarGuardia(guardiaSeleccionada)}
-          className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-        >
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-          </svg>
-          Solicitar Cambio
-        </button>
-      </div>
+      <div className="flex flex-wrap gap-4 justify-end">
+
+    {/* BOTÓN VOLVER AL INICIO */}
+    <button
+      type="button"
+      onClick={irAlInicio}
+      className="
+        px-6 py-3
+        rounded-xl
+        border border-cyan-300
+        text-cyan-700
+        hover:bg-cyan-50
+        transition-colors
+      "
+    >
+      Ir al Inicio
+    </button>
+
+    {/* BOTÓN SOLICITAR CAMBIO */}
+    <button
+      disabled={!guardiaSeleccionada}
+      onClick={() => onSeleccionarGuardia(guardiaSeleccionada)}
+      className="
+        inline-flex items-center
+        px-6 py-3
+        bg-blue-600
+        text-white
+        font-semibold
+        rounded-xl
+        shadow-md
+        hover:bg-blue-700
+        disabled:bg-gray-300
+        disabled:cursor-not-allowed
+        transition-colors
+      "
+    >
+      <svg
+        className="w-5 h-5 mr-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+        />
+      </svg>
+
+      Solicitar Cambio
+    </button>
+
+  </div>
     </div>
   );
 };

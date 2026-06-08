@@ -45,7 +45,12 @@ function formatearFechaBonita(fechaStr) {
   return `${diaSemana} ${parseInt(day)} de ${mesNombre} de ${year}`;
 }
 
-const SolicitudCambio = ({ usuario, guardiaSeleccionada, onCancelar }) => {
+const SolicitudCambio = ({
+  usuario,
+  guardiaSeleccionada,
+  onCancelar,
+  irAlInicio
+}) => {
   const [motivo, setMotivo] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -63,6 +68,9 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, onCancelar }) => {
         },
       });
 
+      console.log(response);
+      console.log(data);
+
       if (!response.ok) {
         setMensaje(data?.error || "No se pudo enviar la solicitud");
         return;
@@ -70,8 +78,13 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, onCancelar }) => {
 
       setMensaje("✅ Solicitud enviada correctamente");
       setMotivo("");
-    } catch (error) {
-      setMensaje("Error del servidor");
+
+      setTimeout(() => {
+        onCancelar();
+      }, 1500);
+    }catch (error) {
+      console.error(error);
+      setMensaje(error.message || "Error del servidor");
     } finally {
       setEnviando(false);
     }
@@ -125,7 +138,24 @@ const SolicitudCambio = ({ usuario, guardiaSeleccionada, onCancelar }) => {
           </div>
         )}
 
-        <div className="flex gap-4 justify-end pt-2">
+        <div className="flex flex-wrap gap-4 justify-end pt-2">
+
+          <button
+            type="button"
+            onClick={irAlInicio}
+            className="
+              px-5 py-2.5
+              rounded-xl
+              border border-cyan-300
+              text-cyan-700
+              hover:bg-cyan-50
+              transition-colors
+            "
+          >
+            Ir al Inicio
+          </button>
+
+
           <button
             type="button"
             onClick={onCancelar}

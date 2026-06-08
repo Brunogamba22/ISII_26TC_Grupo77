@@ -21,6 +21,7 @@ async function consultarGuardiasAsignadas(req, res) {
         estado
       FROM guardia
       WHERE id_usuario = ?
+      AND estado = 'asignada'
       ORDER BY fecha ASC
       `,
       [id_usuario]
