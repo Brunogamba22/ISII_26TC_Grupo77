@@ -38,7 +38,7 @@ function VistaGuardias({ setVistaActiva }) {
             id_usuario={usuario.id_usuario}
             onSeleccionarGuardia={setGuardiaSeleccionada}
             onGuardiasCargadas={setGuardias}
-            irAlInicio={irAlInicio}   // ✅ Se pasa la función
+            irAlInicio={irAlInicio}   //  Se pasa la función
           />
         ) : (
           <SolicitudCambio
@@ -46,7 +46,7 @@ function VistaGuardias({ setVistaActiva }) {
             guardiaSeleccionada={guardiaSeleccionada}
             guardias={guardias}
             onCancelar={() => setGuardiaSeleccionada(null)}
-            irAlInicio={irAlInicio}   // ✅ Se pasa la función
+            irAlInicio={irAlInicio}   // Se pasa la función
           />
         )}
       </div>

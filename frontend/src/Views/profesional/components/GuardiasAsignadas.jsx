@@ -5,51 +5,40 @@ import { apiRequest } from "../../../apiClient";
 import GuardiasCard from "./GuardiasCard";
 
 /**
- * Componente que obtiene las guardias del profesional y permite:
- * - Visualizar guardias actuales y solicitudes pendientes.
- * - Solicitar cambio de guardia.
- * - Cancelar solicitudes pendientes.
- *
- * Props:
- * @param {string} id_usuario          - ID del profesional autenticado.
- * @param {function} onSeleccionarGuardia - Callback que recibe la guardia para solicitar cambio.
- * @param {function} onGuardiasCargadas   - Callback que notifica al padre la lista completa.
- * @param {function} irAlInicio           - Función para volver a la vista de inicio.
+ * Componente principal que:
+ * - Obtiene las guardias del profesional desde el backend.
+ * - Muestra tarjetas con filtro entre "asignadas" y "pendientes".
+ * - Permite solicitar cambio o cancelar una solicitud pendiente.
  */
 const GuardiasAsignadas = ({
-  id_usuario,
-  onSeleccionarGuardia,
-  onGuardiasCargadas,
-  irAlInicio,
+  id_usuario,            // ID del médico logueado
+  onSeleccionarGuardia,  // Callback al elegir una guardia para solicitar cambio
+  onGuardiasCargadas,    // Callback que notifica al padre la lista completa
+  irAlInicio,            // Función para volver a la vista de inicio
 }) => {
-  // Estado: lista completa de guardias (asignadas y pendientes)
+  // Lista completa de guardias (asignadas y pendientes)
   const [guardias, setGuardias] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+  const [filtroActivo, setFiltroActivo] = useState("asignadas"); // 'asignadas' | 'pendientes'
 
-  // Nuevo estado para el filtro activo: 'asignadas' | 'pendientes'
-  const [filtroActivo, setFiltroActivo] = useState("asignadas");
-
-  // Carga inicial de guardias (sin cambios)
+  /**
+   * Efecto que carga las guardias al montar el componente
+   * y cada vez que cambie el id_usuario.
+   */
   useEffect(() => {
     const cargarGuardias = async () => {
       try {
         setCargando(true);
         setError("");
-
         const { response, data } = await apiRequest(`/guardias/${id_usuario}`);
-
         if (!response.ok) {
           setError(data?.mensaje || "No se pudieron cargar las guardias");
           return;
         }
-
         const lista = data?.guardias || [];
         setGuardias(lista);
-
-        if (onGuardiasCargadas) {
-          onGuardiasCargadas(lista);
-        }
+        if (onGuardiasCargadas) onGuardiasCargadas(lista); // notifica al padre
       } catch (err) {
         console.error(err);
         setError("Error al cargar guardias");
@@ -58,84 +47,83 @@ const GuardiasAsignadas = ({
       }
     };
 
-    if (id_usuario) {
-      cargarGuardias();
-    }
+    if (id_usuario) cargarGuardias();
   }, [id_usuario, onGuardiasCargadas]);
 
   /**
-   * Cancelar una solicitud pendiente (sin cambios en la lógica)
+   * Cancela una solicitud de cambio pendiente.
+   * Llama al backend y luego actualiza el estado local.
    */
   const cancelarSolicitud = async (id_guardia) => {
     try {
-      const confirmar = window.confirm("¿Desea cancelar la solicitud?");
-      if (!confirmar) return;
-
+      if (!window.confirm("¿Desea cancelar la solicitud?")) return;
       const { response, data } = await apiRequest(
         `/solicitudes/cancelar/${id_guardia}`,
         { method: "PUT" }
       );
-
       if (!response.ok) {
         alert(data?.error || "No se pudo cancelar");
         return;
       }
-
-      // Actualización local optimista
-      const nuevasGuardias = guardias.map((guardia) => {
-        if (Number(guardia.id_guardia) === Number(id_guardia)) {
-          return { ...guardia, estado: "asignada" };
-        }
-        return guardia;
-      });
-
-      setGuardias(nuevasGuardias);
+      // Actualiza la guardia local sin recargar toda la lista
+      setGuardias((prev) =>
+        prev.map((g) =>
+          g.id_guardia === id_guardia ? { ...g, estado: "asignada" } : g
+        )
+      );
       alert("Solicitud cancelada correctamente");
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       alert("Error al cancelar solicitud");
     }
   };
 
-  // Filtrado según la pestaña activa
+  /**
+   * Filtra las guardias según la pestaña activa.
+   * - "asignadas": todas menos las pendientes.
+   * - "pendientes": solo las que tienen estado "pendiente".
+   */
   const guardiasFiltradas = guardias.filter((g) => {
     if (filtroActivo === "pendientes") return g.estado === "pendiente";
-    if (filtroActivo === "asignadas") return g.estado !== "pendiente"; // incluye "asignada" o cualquier otro estado que no sea pendiente
-    return true; // por si se agrega una opción "todas" en el futuro
+    return g.estado !== "pendiente";
   });
 
-  // Cantidad de cada tipo para mostrar en las pestañas
+  // Contadores para mostrar en los botones
   const totalAsignadas = guardias.filter((g) => g.estado !== "pendiente").length;
   const totalPendientes = guardias.filter((g) => g.estado === "pendiente").length;
 
-  // Renderizado condicional: carga o error
+  // Estado de carga
   if (cargando) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
-        <span className="ml-3 text-gray-600">Cargando guardias...</span>
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600" />
+        <span className="mt-4 text-gray-500">Cargando guardias...</span>
       </div>
     );
   }
 
+  // Estado de error
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl">
+      <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl flex items-center gap-3">
+        <span className="text-xl">⚠️</span>
         {error}
       </div>
     );
   }
 
+  // Vista principal con datos ya cargados
   return (
     <div className="space-y-8">
-      {/* CABECERA */}
-      <header>
+      {/* Cabecera */}
+      <div>
         <h1 className="text-3xl font-bold text-gray-800">Gestión de Reemplazos</h1>
         <p className="text-gray-500 mt-2">
           Selecciona una guardia para solicitar un cambio de turno.
         </p>
-      </header>
+      </div>
 
+      
       {/* SELECTOR DE VISTA (PESTAÑAS) */}
       <div className="flex gap-2 bg-gray-100 p-1.5 rounded-2xl w-fit">
         {/* Pestaña: Guardias Actuales */}
@@ -163,19 +151,26 @@ const GuardiasAsignadas = ({
         </button>
       </div>
 
-      {/* GRID DE CARDS FILTRADAS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+      {/* Grid de tarjetas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
         {guardiasFiltradas.length === 0 ? (
-          <div className="col-span-full text-center py-12 text-gray-500">
-            {filtroActivo === "asignadas"
-              ? "No tienes guardias asignadas actualmente."
-              : "No tienes solicitudes pendientes."}
+          // Mensaje cuando no hay elementos en el filtro actual
+          <div className="col-span-full flex flex-col items-center py-16 text-gray-400">
+            <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-3-3v6m-7 4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <p className="text-lg">
+              {filtroActivo === "asignadas"
+                ? "No hay guardias asignadas"
+                : "No hay solicitudes pendientes"}
+            </p>
           </div>
         ) : (
+          // Mapeo de cada guardia a una tarjeta
           guardiasFiltradas.map((guardia) => (
             <div
               key={guardia.id_guardia}
-              className="cursor-pointer transition-all duration-200 transform hover:scale-[1.02]"
+              className="cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
             >
               <GuardiasCard
                 guardia={guardia}
@@ -187,13 +182,15 @@ const GuardiasAsignadas = ({
         )}
       </div>
 
-      {/* BOTONES INFERIORES */}
-      <div className="flex flex-wrap gap-4 justify-end">
+      {/* Botón inferior para volver al inicio */}
+      <div className="flex justify-end">
         <button
-          type="button"
           onClick={irAlInicio}
-          className="px-6 py-3 rounded-xl border border-cyan-300 text-cyan-700 hover:bg-cyan-50 transition-colors"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl border border-cyan-300 text-cyan-700 hover:bg-cyan-50 transition-colors"
         >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
           Ir al Inicio
         </button>
       </div>

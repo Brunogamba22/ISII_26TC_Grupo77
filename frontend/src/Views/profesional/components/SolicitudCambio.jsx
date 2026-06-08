@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { apiRequest } from "../../../apiClient";
 
-// Mismos helpers de formato (podrían extraerse a un archivo común)
+// Mismos helpers de formato (sin cambios)
 const DIAS_SEMANA = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -82,7 +82,7 @@ const SolicitudCambio = ({
       setTimeout(() => {
         onCancelar();
       }, 1500);
-    }catch (error) {
+    } catch (error) {
       console.error(error);
       setMensaje(error.message || "Error del servidor");
     } finally {
@@ -103,12 +103,21 @@ const SolicitudCambio = ({
         </p>
       </div>
 
-      <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100">
+      <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100 shadow-sm">
         <h2 className="text-lg font-semibold text-blue-800 mb-3">Detalle de la guardia</h2>
-        <div className="space-y-1 text-sm text-gray-700">
-          <p><span className="font-medium">📅 Fecha:</span> {fechaBonita}</p>
-          <p><span className="font-medium">🕒 Horario:</span> {horaInicio} – {horaFin}</p>
-          <p><span className="font-medium">🔢 ID Guardia:</span> #{guardiaSeleccionada.id_guardia}</p>
+        <div className="space-y-2 text-sm text-gray-700">
+          <p className="flex items-center gap-2">
+            <span className="text-blue-500">📅</span>
+            <span className="font-medium">Fecha:</span> {fechaBonita}
+          </p>
+          <p className="flex items-center gap-2">
+            <span className="text-blue-500">🕒</span>
+            <span className="font-medium">Horario:</span> {horaInicio} – {horaFin}
+          </p>
+          <p className="flex items-center gap-2">
+            <span className="text-blue-500">🔢</span>
+            <span className="font-medium">ID Guardia:</span> #{guardiaSeleccionada.id_guardia}
+          </p>
         </div>
       </div>
 
@@ -122,58 +131,70 @@ const SolicitudCambio = ({
             onChange={(e) => setMotivo(e.target.value)}
             rows="4"
             placeholder="Explicá brevemente por qué necesitás el reemplazo..."
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"
           />
         </div>
 
         {mensaje && (
           <div
-            className={`p-4 rounded-xl text-sm ${
+            className={`p-4 rounded-xl text-sm flex items-center gap-2 ${
               mensaje.includes("correctamente")
                 ? "bg-green-50 text-green-700 border border-green-200"
                 : "bg-red-50 text-red-700 border border-red-200"
             }`}
           >
+            <span>{mensaje.includes("correctamente") ? "✅" : "⚠️"}</span>
             {mensaje}
           </div>
         )}
 
-        {/* Botones reordenados según lo solicitado */}
-        <div className="flex flex-wrap gap-4 justify-end pt-2">
-          {/* 1. Enviar Solicitud (arriba) */}
+        {/* Botones con iconos y estilos mejorados */}
+        <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
+          {/* 1. Enviar Solicitud */}
           <button
             type="submit"
             disabled={enviando || !motivo.trim()}
-            className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-md"
           >
             {enviando ? (
               <>
-                <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
                 Enviando...
               </>
             ) : (
-              "Enviar Solicitud"
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+                Enviar Solicitud
+              </>
             )}
           </button>
 
-          {/* 2. Volver (medio) */}
+          {/* 2. Volver */}
           <button
             type="button"
             onClick={onCancelar}
-            className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-5 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
           >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
             Volver
           </button>
 
-          {/* 3. Ir al Inicio (abajo) */}
+          {/* 3. Ir al Inicio */}
           <button
             type="button"
             onClick={irAlInicio}
-            className="px-5 py-2.5 rounded-xl border border-cyan-300 text-cyan-700 hover:bg-cyan-50 transition-colors"
+            className="px-5 py-3 rounded-xl border border-cyan-300 text-cyan-700 hover:bg-cyan-50 transition-colors flex items-center gap-2"
           >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
             Ir al Inicio
           </button>
         </div>
