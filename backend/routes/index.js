@@ -2,7 +2,8 @@ const express = require("express");
 const { validarCredenciales } = require("../controllers/authController");
 const {
   consultarGuardiasAsignadas,
-  asignarGuardiasAutomaticamente
+  previsualizarAsignacion,
+  confirmarAsignacion
 } = require("../controllers/guardiaController");
 
 
@@ -39,10 +40,9 @@ router.get("/api/guardias/:id_usuario", consultarGuardiasAsignadas);
 
 // --- NUEVAS RUTAS: ASIGNACIÓN MASIVA DE GUARDIAS ---
 
-router.post(
-  "/api/asignacion/ejecutar",
-  asignarGuardiasAutomaticamente
-);
+router.post("/api/asignacion/previsualizar", previsualizarAsignacion);
+
+router.post("/api/asignacion/confirmar", confirmarAsignacion);
 
 // --- RUTAS DE GESTIÓN DE PERSONAL (ADMINISTRADOR) ---
 

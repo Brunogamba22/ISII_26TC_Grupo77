@@ -43,18 +43,7 @@ async function consultarGuardiasAsignadas(req, res) {
   }
 }
 
-/**
- * Controlador: Asignar guardias automáticamente (Contrato 4).
- *
- * Responsabilidades:
- * - Consultar profesionales disponibles por especialidad.
- * - Recuperar reglas configuradas por el administrador.
- * - Ejecutar el motor de asignación (Patrón Strategy).
- * - Persistir las guardias generadas.
- */
-async function asignarGuardiasAutomaticamente(req, res) {
-
-  let connection;
+async function previsualizarAsignacion(req, res) {
 
   try {
 
@@ -69,6 +58,130 @@ async function asignarGuardiasAutomaticamente(req, res) {
       !mes ||
       !anio ||
       !id_especialidad
+    ) {
+      return res.status(400).json({
+        error:
+          "Faltan parámetros requeridos para la generación."
+      });
+    }
+
+    const diasDelMes =
+      new Date(
+        anio,
+        Number(mes),
+        0
+      ).getDate();
+
+    const [profesionales] =
+      await db.query(
+        `
+        SELECT
+          id_usuario,
+          nombre,
+          apellido
+        FROM usuario
+        WHERE id_especialidad = ?
+        `,
+        [id_especialidad]
+      );
+
+    if (
+      !profesionales ||
+      profesionales.length < 2
+    ) {
+      return res.status(400).json({
+        error:
+          "No hay suficientes profesionales para generar las guardias"
+      });
+    }
+
+    const motor =
+      new MotorDeAsignacion(
+        new AsignacionEquitativa()
+      );
+
+    const turnosGenerados =
+      motor.ejecutar(
+        profesionales,
+        diasDelMes,
+        reglas
+      );
+
+    return res.status(200).json({
+
+      borrador: true,
+
+      turnos: turnosGenerados.map(
+        (turno) => {
+
+          const profesional =
+            profesionales.find(
+              p =>
+                p.id_usuario ===
+                turno.id_usuario
+            );
+
+          return {
+            ...turno,
+
+            nombreCompleto:
+              profesional
+                ? `${profesional.nombre} ${profesional.apellido}`
+                : "Profesional desconocido",
+
+            horario:
+              "08:00 - 20:00",
+
+            estado:
+              "BORRADOR"
+          };
+        }
+      )
+    });
+
+  } catch (error) {
+
+    console.error(
+      "Error al previsualizar:",
+      error
+    );
+
+    return res.status(500).json({
+      error:
+        "Error interno del servidor."
+    });
+  }
+}
+
+/**
+ * Controlador: Asignar guardias automáticamente (Contrato 4).
+ *
+ * Responsabilidades:
+ * - Consultar profesionales disponibles por especialidad.
+ * - Recuperar reglas configuradas por el administrador.
+ * - Ejecutar el motor de asignación (Patrón Strategy).
+ * - Persistir las guardias generadas.
+ */
+async function confirmarAsignacion(req, res) {
+
+  let connection;
+
+  try {
+
+    const {
+      mes,
+      anio,
+      id_especialidad,
+      reglas,
+      turnos
+    } = req.body;
+
+    if (
+      !mes ||
+      !anio ||
+      !id_especialidad ||
+      !Array.isArray(turnos) || 
+      turnos.length === 0
     ) {
       return res.status(400).json({
         error: "Faltan parámetros requeridos para la generación."
@@ -174,27 +287,13 @@ async function asignarGuardiasAutomaticamente(req, res) {
       });
     }
 
-    // =====================================================
-    // 4. EJECUTAR ESTRATEGIA
-    // =====================================================
-
-    const motor =
-      new MotorDeAsignacion(
-        new AsignacionEquitativa()
-      );
-
-    const turnosGenerados =
-      motor.ejecutar(
-        profesionales,
-        diasDelMes,
-        reglas
-      );
+    
 
     // =====================================================
     // 5. INSERTAR GUARDIAS
     // =====================================================
 
-    for (const turno of turnosGenerados) {
+    for (const turno of turnos) {
 
       const fecha =
         `${anio}-${String(mes).padStart(2, "0")}-${String(turno.dia).padStart(2, "0")}`;
@@ -241,35 +340,9 @@ async function asignarGuardiasAutomaticamente(req, res) {
     await connection.commit();
 
     return res.status(200).json({
-
       mensaje:
-        "Guardias generadas y asignadas exitosamente.",
-
+        "Cronograma guardado correctamente.",
       id_calendario,
-
-      turnos: turnosGenerados.map(
-        (turno) => {
-
-          const profesional =
-            profesionales.find(
-              (p) =>
-                p.id_usuario ===
-                turno.id_usuario
-            );
-
-          return {
-            ...turno,
-            nombreCompleto:
-              profesional
-                ? `${profesional.nombre} ${profesional.apellido}`
-                : "Profesional desconocido",
-            horario:
-              "08:00 - 20:00",
-            estado:
-              "Asignada"
-          };
-        }
-      )
     });
 
   } catch (error) {
@@ -299,5 +372,6 @@ async function asignarGuardiasAutomaticamente(req, res) {
 
 module.exports = {
   consultarGuardiasAsignadas,
-  asignarGuardiasAutomaticamente
+  previsualizarAsignacion,
+  confirmarAsignacion
 };
