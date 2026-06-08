@@ -4,8 +4,11 @@ import { useState, useEffect } from "react";
 import { apiRequest } from "../../../apiClient";
 import GuardiasCard from "./GuardiasCard";
 
+// ============================================================
+// COMPONENTE PRINCIPAL
+// ============================================================
 /**
- * Componente principal que:
+ * Componente que:
  * - Obtiene las guardias del profesional desde el backend.
  * - Muestra tarjetas con filtro entre "asignadas" y "pendientes".
  * - Permite solicitar cambio o cancelar una solicitud pendiente.
@@ -16,16 +19,17 @@ const GuardiasAsignadas = ({
   onGuardiasCargadas,    // Callback que notifica al padre la lista completa
   irAlInicio,            // Función para volver a la vista de inicio
 }) => {
-  // Lista completa de guardias (asignadas y pendientes)
-  const [guardias, setGuardias] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState("");
+  // ============================================================
+  // ESTADOS
+  // ============================================================
+  const [guardias, setGuardias] = useState([]);       // Lista completa
+  const [cargando, setCargando] = useState(true);    // Control de carga
+  const [error, setError] = useState("");            // Mensaje de error
   const [filtroActivo, setFiltroActivo] = useState("asignadas"); // 'asignadas' | 'pendientes'
 
-  /**
-   * Efecto que carga las guardias al montar el componente
-   * y cada vez que cambie el id_usuario.
-   */
+  // ============================================================
+  // EFECTO: Cargar guardias al montar o cambiar id_usuario
+  // ============================================================
   useEffect(() => {
     const cargarGuardias = async () => {
       try {
@@ -38,7 +42,7 @@ const GuardiasAsignadas = ({
         }
         const lista = data?.guardias || [];
         setGuardias(lista);
-        if (onGuardiasCargadas) onGuardiasCargadas(lista); // notifica al padre
+        if (onGuardiasCargadas) onGuardiasCargadas(lista); // Notifica al padre
       } catch (err) {
         console.error(err);
         setError("Error al cargar guardias");
@@ -50,10 +54,9 @@ const GuardiasAsignadas = ({
     if (id_usuario) cargarGuardias();
   }, [id_usuario, onGuardiasCargadas]);
 
-  /**
-   * Cancela una solicitud de cambio pendiente.
-   * Llama al backend y luego actualiza el estado local.
-   */
+  // ============================================================
+  // FUNCIÓN: Cancelar solicitud pendiente
+  // ============================================================
   const cancelarSolicitud = async (id_guardia) => {
     try {
       if (!window.confirm("¿Desea cancelar la solicitud?")) return;
@@ -65,7 +68,7 @@ const GuardiasAsignadas = ({
         alert(data?.error || "No se pudo cancelar");
         return;
       }
-      // Actualiza la guardia local sin recargar toda la lista
+      // Actualiza el estado local sin recargar toda la lista
       setGuardias((prev) =>
         prev.map((g) =>
           g.id_guardia === id_guardia ? { ...g, estado: "asignada" } : g
@@ -78,11 +81,9 @@ const GuardiasAsignadas = ({
     }
   };
 
-  /**
-   * Filtra las guardias según la pestaña activa.
-   * - "asignadas": todas menos las pendientes.
-   * - "pendientes": solo las que tienen estado "pendiente".
-   */
+  // ============================================================
+  // FILTRADO DE GUARDIAS SEGÚN PESTAÑA ACTIVA
+  // ============================================================
   const guardiasFiltradas = guardias.filter((g) => {
     if (filtroActivo === "pendientes") return g.estado === "pendiente";
     return g.estado !== "pendiente";
@@ -92,7 +93,9 @@ const GuardiasAsignadas = ({
   const totalAsignadas = guardias.filter((g) => g.estado !== "pendiente").length;
   const totalPendientes = guardias.filter((g) => g.estado === "pendiente").length;
 
-  // Estado de carga
+  // ============================================================
+  // RENDERIZADO CONDICIONAL: Carga / Error
+  // ============================================================
   if (cargando) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -102,7 +105,6 @@ const GuardiasAsignadas = ({
     );
   }
 
-  // Estado de error
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl flex items-center gap-3">
@@ -112,10 +114,12 @@ const GuardiasAsignadas = ({
     );
   }
 
-  // Vista principal con datos ya cargados
+  // ============================================================
+  // VISTA PRINCIPAL
+  // ============================================================
   return (
     <div className="space-y-8">
-      {/* Cabecera */}
+      {/* CABECERA */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800">Gestión de Reemplazos</h1>
         <p className="text-gray-500 mt-2">
@@ -123,10 +127,8 @@ const GuardiasAsignadas = ({
         </p>
       </div>
 
-      
       {/* SELECTOR DE VISTA (PESTAÑAS) */}
       <div className="flex gap-2 bg-gray-100 p-1.5 rounded-2xl w-fit">
-        {/* Pestaña: Guardias Actuales */}
         <button
           onClick={() => setFiltroActivo("asignadas")}
           className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
@@ -138,7 +140,6 @@ const GuardiasAsignadas = ({
           🟢 Guardias Actuales ({totalAsignadas})
         </button>
 
-        {/* Pestaña: Solicitudes Pendientes */}
         <button
           onClick={() => setFiltroActivo("pendientes")}
           className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
@@ -151,10 +152,10 @@ const GuardiasAsignadas = ({
         </button>
       </div>
 
-      {/* Grid de tarjetas */}
+      {/* GRID DE TARJETAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
         {guardiasFiltradas.length === 0 ? (
-          // Mensaje cuando no hay elementos en el filtro actual
+          // Mensaje cuando no hay elementos
           <div className="col-span-full flex flex-col items-center py-16 text-gray-400">
             <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-3-3v6m-7 4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -166,7 +167,6 @@ const GuardiasAsignadas = ({
             </p>
           </div>
         ) : (
-          // Mapeo de cada guardia a una tarjeta
           guardiasFiltradas.map((guardia) => (
             <div
               key={guardia.id_guardia}
@@ -182,7 +182,7 @@ const GuardiasAsignadas = ({
         )}
       </div>
 
-      {/* Botón inferior para volver al inicio */}
+      {/* BOTÓN PARA VOLVER AL INICIO */}
       <div className="flex justify-end">
         <button
           onClick={irAlInicio}

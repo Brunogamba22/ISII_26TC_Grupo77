@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { apiRequest } from "../../../apiClient";
 
-// Mismos helpers de formato (sin cambios)
+// ============================================================
+// HELPERS DE FORMATEO (sin cambios)
+// ============================================================
 const DIAS_SEMANA = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -45,16 +47,23 @@ function formatearFechaBonita(fechaStr) {
   return `${diaSemana} ${parseInt(day)} de ${mesNombre} de ${year}`;
 }
 
+// ============================================================
+// COMPONENTE PRINCIPAL
+// ============================================================
 const SolicitudCambio = ({
   usuario,
   guardiaSeleccionada,
   onCancelar,
   irAlInicio
 }) => {
+  // Estados internos
   const [motivo, setMotivo] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [enviando, setEnviando] = useState(false);
 
+  // ============================================================
+  // MANEJAR ENVÍO DEL FORMULARIO
+  // ============================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -90,12 +99,17 @@ const SolicitudCambio = ({
     }
   };
 
+  // Formateo de datos de la guardia seleccionada
   const fechaBonita = formatearFechaBonita(guardiaSeleccionada.fecha);
   const horaInicio = normalizarHora(guardiaSeleccionada.hora_inicio);
   const horaFin = normalizarHora(guardiaSeleccionada.hora_fin);
 
+  // ============================================================
+  // VISTA PRINCIPAL
+  // ============================================================
   return (
     <div className="max-w-2xl mx-auto space-y-8">
+      {/* CABECERA */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800">Solicitar Cambio de Guardia</h1>
         <p className="text-gray-500 mt-2">
@@ -103,6 +117,7 @@ const SolicitudCambio = ({
         </p>
       </div>
 
+      {/* DETALLE DE LA GUARDIA */}
       <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100 shadow-sm">
         <h2 className="text-lg font-semibold text-blue-800 mb-3">Detalle de la guardia</h2>
         <div className="space-y-2 text-sm text-gray-700">
@@ -121,6 +136,7 @@ const SolicitudCambio = ({
         </div>
       </div>
 
+      {/* FORMULARIO DE SOLICITUD */}
       <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -135,6 +151,7 @@ const SolicitudCambio = ({
           />
         </div>
 
+        {/* MENSAJE DE RESPUESTA */}
         {mensaje && (
           <div
             className={`p-4 rounded-xl text-sm flex items-center gap-2 ${
@@ -148,9 +165,9 @@ const SolicitudCambio = ({
           </div>
         )}
 
-        {/* Botones con iconos y estilos mejorados */}
+        {/* BOTONES DE ACCIÓN */}
         <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
-          {/* 1. Enviar Solicitud */}
+          {/* Botón Enviar Solicitud */}
           <button
             type="submit"
             disabled={enviando || !motivo.trim()}
@@ -174,7 +191,7 @@ const SolicitudCambio = ({
             )}
           </button>
 
-          {/* 2. Volver */}
+          {/* Botón Volver */}
           <button
             type="button"
             onClick={onCancelar}
@@ -186,7 +203,7 @@ const SolicitudCambio = ({
             Volver
           </button>
 
-          {/* 3. Ir al Inicio */}
+          {/* Botón Ir al Inicio */}
           <button
             type="button"
             onClick={irAlInicio}

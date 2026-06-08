@@ -1,6 +1,8 @@
 // src/Views/profesional/components/GuardiasCard.jsx
 
-// Días y meses en español para formatear fechas
+// ============================================================
+// HELPERS DE FORMATEO DE FECHAS Y HORAS
+// ============================================================
 const DIAS_SEMANA = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -8,8 +10,7 @@ const MESES = [
 ];
 
 /**
- * Convierte cualquier representación de fecha (string ISO, Date) a "YYYY-MM-DD".
- * Retorna null si no es una fecha válida.
+ * Convierte cualquier fecha a "YYYY-MM-DD"
  */
 function normalizarFecha(fecha) {
   if (!fecha) return null;
@@ -22,8 +23,7 @@ function normalizarFecha(fecha) {
 }
 
 /**
- * Convierte cualquier representación de hora a "HH:MM".
- * Acepta string "HH:MM:SS" o Date.
+ * Convierte cualquier hora a "HH:MM"
  */
 function normalizarHora(hora) {
   if (!hora) return "";
@@ -40,8 +40,7 @@ function normalizarHora(hora) {
 }
 
 /**
- * Formatea una fecha legible por humanos:
- * "Viernes 6 de Junio de 2026"
+ * Formato legible: "Viernes 6 de Junio de 2026"
  */
 function formatearFechaBonita(fechaStr) {
   const fecha = normalizarFecha(fechaStr);
@@ -54,30 +53,39 @@ function formatearFechaBonita(fechaStr) {
   return `${diaSemana} ${parseInt(day)} de ${mesNombre} de ${year}`;
 }
 
+// ============================================================
+// COMPONENTE TARJETA DE GUARDIA
+// ============================================================
 /**
- * Tarjeta individual que representa una guardia.
- * Muestra fecha, horario, estado y un botón de acción.
+ * Muestra una guardia individual con:
+ * - Fecha formateada
+ * - Horario
+ * - Estado (asignada o pendiente)
+ * - Botón de acción (solicitar cambio / cancelar solicitud)
  */
 function GuardiasCard({ guardia, onCancelarSolicitud, onSolicitarCambio }) {
-  // Formateo de los datos
+  // Formateo de datos
   const fechaBonita = formatearFechaBonita(guardia.fecha);
   const horaInicio = normalizarHora(guardia.hora_inicio);
   const horaFin = normalizarHora(guardia.hora_fin);
   const rangoHorario = `${horaInicio} – ${horaFin}`;
 
-  // Determina si la guardia tiene una solicitud de cambio pendiente
+  // Determina si la guardia tiene solicitud pendiente
   const esPendiente = guardia.estado === "pendiente";
 
-  // Estilos dinámicos según el estado
+  // Estilos dinámicos según estado
   const estilosCard = esPendiente
     ? "bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200 hover:border-yellow-300"
     : "bg-gradient-to-br from-white to-blue-50/30 border-gray-200 hover:border-blue-300";
 
   const estilosTitulo = esPendiente ? "text-yellow-700" : "text-blue-700";
 
+  // ============================================================
+  // RENDERIZADO DE LA TARJETA
+  // ============================================================
   return (
     <div className={`rounded-2xl p-6 border shadow-sm hover:shadow-lg transition-all duration-300 ${estilosCard}`}>
-      {/* Encabezado con fecha e ID */}
+      {/* Encabezado: fecha e ID */}
       <div className="flex justify-between items-start mb-5">
         <div>
           <h2 className={`text-xl font-bold ${estilosTitulo}`}>{fechaBonita}</h2>
@@ -86,7 +94,7 @@ function GuardiasCard({ guardia, onCancelarSolicitud, onSolicitarCambio }) {
         <span className="text-3xl opacity-20">🏥</span>
       </div>
 
-      {/* Horario con icono */}
+      {/* Horario */}
       <div className="flex items-center gap-2 text-gray-700 mb-5">
         <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -94,7 +102,7 @@ function GuardiasCard({ guardia, onCancelarSolicitud, onSolicitarCambio }) {
         <span className="font-medium">{rangoHorario}</span>
       </div>
 
-      {/* Badge de estado: pendiente o asignada */}
+      {/* Estado */}
       <div className="mb-6">
         {esPendiente ? (
           <span className="inline-flex items-center gap-1.5 bg-yellow-200 text-yellow-900 px-4 py-1.5 rounded-full text-sm font-semibold">
@@ -107,10 +115,10 @@ function GuardiasCard({ guardia, onCancelarSolicitud, onSolicitarCambio }) {
         )}
       </div>
 
-      {/* Botón de acción: solicitar cambio o cancelar solicitud */}
+      {/* Botón de acción */}
       <button
         onClick={(e) => {
-          e.stopPropagation(); // Evita que el clic se propague a la tarjeta padre
+          e.stopPropagation(); // Evita propagación a contenedores padres
           esPendiente
             ? onCancelarSolicitud(guardia.id_guardia)
             : onSolicitarCambio(guardia);
