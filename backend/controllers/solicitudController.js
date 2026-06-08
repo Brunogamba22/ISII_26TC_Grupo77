@@ -63,32 +63,95 @@ async function crearSolicitudDeCambio(req, res) {
   ]
 );
 
-// CAMBIAR ESTADO DE LA GUARDIA
-await db.query(
-  `
-  UPDATE guardia
-  SET estado = 'pendiente'
-  WHERE id_guardia = ?
-  `,
-  [id_guardia]
-);
 
-    return res.status(201).json({
-      mensaje:
-        "Solicitud registrada correctamente",
-    });
+  // CAMBIAR ESTADO DE LA GUARDIA
+  await db.query(
+    `
+    UPDATE guardia
+    SET estado = 'pendiente'
+    WHERE id_guardia = ?
+    `,
+    [id_guardia]
+  );
 
-  } catch (error) {
+      return res.status(201).json({
+        mensaje:
+          "Solicitud registrada correctamente",
+      });
 
-    console.error(error);
+    } catch (error) {
 
-    return res.status(500).json({
-      error:
-        "Error interno del servidor",
-    });
+      console.error(error);
+
+      return res.status(500).json({
+        error:
+          "Error interno del servidor",
+      });
+    }
   }
-}
+
+
+/**
+ * Cancela una solicitud pendiente.
+ *
+ * Responsabilidades:
+ * - eliminar reemplazo pendiente
+ * - restaurar estado guardia
+ */
+async function cancelarSolicitud(
+  req,
+  res
+) {
+
+  try {
+
+    const { id_guardia } =
+      req.params;
+
+      /**
+       * Eliminamos solicitud pendiente.
+       */
+      await db.query(
+        `
+        DELETE FROM reemplazo
+        WHERE id_guardia = ?
+        AND estado = 'pendiente'
+        `,
+        [id_guardia]
+      );
+
+      /**
+       * Restauramos guardia.
+       */
+      await db.query(
+        `
+        UPDATE guardia
+        SET estado = 'asignada'
+        WHERE id_guardia = ?
+        `,
+        [id_guardia]
+      );
+
+      return res.status(200).json({
+        mensaje:
+          "Solicitud cancelada correctamente",
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      return res.status(500).json({
+        error:
+          "Error interno del servidor",
+      });
+    }
+  }
+
+
+
 
 module.exports = {
   crearSolicitudDeCambio,
+  cancelarSolicitud,
 };

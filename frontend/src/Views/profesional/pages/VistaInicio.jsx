@@ -17,7 +17,59 @@ export default function VistaInicio({
   const nombre =
     localStorage.getItem("nombre") ||
     "Profesional";
+
+
+    const id_usuario =
+    localStorage.getItem("id_usuario");
   
+  /**
+   * Estado local del dashboard.
+   * Guarda métricas del profesional.
+   */
+  const [dashboard, setDashboard] = useState({
+    totalGuardias: 0,
+    solicitudesPendientes: 0,
+    proximaGuardia: null,
+  });
+
+  /**
+ * Carga las métricas dinámicas
+ * del dashboard profesional.
+ */
+useEffect(() => {
+
+  const cargarDashboard = async () => {
+
+    try {
+
+      const { response, data } =
+        await apiRequest(
+          `/dashboard/${id_usuario}`
+        );
+
+      if (!response.ok) {
+        return;
+      }
+
+      setDashboard(data);
+      console.log(data);
+
+    } catch (error) {
+
+      console.error(
+        "Error dashboard:",
+        error
+      );
+    }
+  };
+
+  if (id_usuario) {
+    cargarDashboard();
+  }
+
+}, [id_usuario]);
+
+
   return (
     <div className="space-y-8">
 
@@ -85,7 +137,7 @@ export default function VistaInicio({
               </p>
 
               <h2 className="text-4xl font-bold text-slate-800 mt-2">
-                3
+                {dashboard.totalGuardias}
               </h2>
 
             </div>
@@ -128,7 +180,7 @@ export default function VistaInicio({
               </p>
 
               <h2 className="text-4xl font-bold text-slate-800 mt-2">
-                1
+                {dashboard.solicitudesPendientes}
               </h2>
 
             </div>
@@ -161,23 +213,33 @@ export default function VistaInicio({
             shadow-sm
           "
         >
-
           <div className="flex items-center justify-between">
-
+            
+            {/* ESTE DIV ENVUELVE LOS TEXTOS PARA QUE QUEDEN A LA IZQUIERDA */}
             <div>
-
               <p className="text-slate-500">
-                Próxima Guardia
+                Próxima guardia
               </p>
 
-              <h2 className="text-2xl font-bold text-slate-800 mt-2">
-                10 Jun
-              </h2>
-
-              <p className="text-slate-500 mt-1">
-                08:00 hs
-              </p>
-
+              {dashboard.proximaGuardia ? (
+                <>
+                  <h2 className="text-2xl font-bold text-slate-800 mt-2">
+                    {new Date(
+                      dashboard.proximaGuardia.fecha
+                    ).toLocaleDateString("es-AR", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </h2>
+                  <p className="text-slate-500 mt-1">
+                    {dashboard.proximaGuardia.hora_inicio?.substring(0,5)} hs
+                  </p>
+                </>
+              ) : (
+                <p className="text-slate-400 mt-2 font-medium">
+                  Sin guardias próximas
+                </p>
+              )}
             </div>
 
             <div
@@ -195,7 +257,6 @@ export default function VistaInicio({
             </div>
 
           </div>
-
         </div>
 
         {/* Estado */}

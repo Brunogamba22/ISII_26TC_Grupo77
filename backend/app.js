@@ -2,6 +2,8 @@ require('dotenv').config(); // 1. Cargamos las variables de entorno (.env) prime
 const express = require("express");
 const cors = require("cors");
 const routes = require("./routes/index");
+const dashboardRoutes = require("./routes/dashboard");
+
 const pool = require('./models/db');
 
 const app = express();
@@ -12,7 +14,10 @@ const port = process.env.PORT || 3000;
 // Middlewares
 app.use(cors());
 app.use(express.json());
+//rutas principales:
 app.use(routes);
+//Rutas del dashboard profesional:
+app.use("/api", dashboardRoutes);
 
 // Endpoint raíz de salud (health-check)
 app.get("/", (req, res) => {

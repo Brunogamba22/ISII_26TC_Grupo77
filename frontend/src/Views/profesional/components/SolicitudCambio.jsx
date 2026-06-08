@@ -138,31 +138,9 @@ const SolicitudCambio = ({
           </div>
         )}
 
+        {/* Botones reordenados según lo solicitado */}
         <div className="flex flex-wrap gap-4 justify-end pt-2">
-
-          <button
-            type="button"
-            onClick={irAlInicio}
-            className="
-              px-5 py-2.5
-              rounded-xl
-              border border-cyan-300
-              text-cyan-700
-              hover:bg-cyan-50
-              transition-colors
-            "
-          >
-            Ir al Inicio
-          </button>
-
-
-          <button
-            type="button"
-            onClick={onCancelar}
-            className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Volver
-          </button>
+          {/* 1. Enviar Solicitud (arriba) */}
           <button
             type="submit"
             disabled={enviando || !motivo.trim()}
@@ -179,6 +157,24 @@ const SolicitudCambio = ({
             ) : (
               "Enviar Solicitud"
             )}
+          </button>
+
+          {/* 2. Volver (medio) */}
+          <button
+            type="button"
+            onClick={onCancelar}
+            className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Volver
+          </button>
+
+          {/* 3. Ir al Inicio (abajo) */}
+          <button
+            type="button"
+            onClick={irAlInicio}
+            className="px-5 py-2.5 rounded-xl border border-cyan-300 text-cyan-700 hover:bg-cyan-50 transition-colors"
+          >
+            Ir al Inicio
           </button>
         </div>
       </form>
