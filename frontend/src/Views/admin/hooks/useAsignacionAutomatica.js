@@ -23,20 +23,28 @@ export function useAsignacionAutomatica() {
   };
 
   const generar = async () => {
+    const confirmado = window.confirm(
+      '¿Desea generar automáticamente las guardias?'
+    );
+  
+    if (!confirmado) {
+      return;
+    }
+  
     setFeedback({ tipo: null, texto: '' });
-
+  
     const validacion = validar();
     if (!validacion.ok) {
       setFeedback({ tipo: 'error', texto: validacion.texto });
       return;
     }
-
+  
     setCargando(true);
     setTurnosGenerados([]);
-
+  
     try {
       const { mes, anio, especialidadSeleccionada, ...reglas } = formulario;
-
+  
       const resultado = await asignacionService.ejecutarAsignacionCompleta({
         mes,
         anio,
@@ -48,17 +56,25 @@ export function useAsignacionAutomatica() {
           observaciones: reglas.observaciones,
         },
       });
-
+  
       if (!resultado.ok) {
         setFeedback({ tipo: 'error', texto: resultado.error });
         return;
       }
-
-      setFeedback({ tipo: 'success', texto: 'Guardias generadas correctamente.' });
+  
+      setFeedback({
+        tipo: 'success',
+        texto: 'Guardias generadas correctamente.',
+      });
+  
       setTurnosGenerados(resultado.turnos);
     } catch (error) {
       console.error(error);
-      setFeedback({ tipo: 'error', texto: 'Error de conexión con el servidor.' });
+  
+      setFeedback({
+        tipo: 'error',
+        texto: 'Error de conexión con el servidor.',
+      });
     } finally {
       setCargando(false);
     }

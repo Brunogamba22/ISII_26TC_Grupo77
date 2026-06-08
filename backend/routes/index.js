@@ -5,9 +5,7 @@ const {
   asignarGuardiasAutomaticamente
 } = require("../controllers/guardiaController");
 
-const {
-  configurarParametrosDistribucion
-} = require("../controllers/calendarioController");
+
 
 const {
   crearSolicitudDeCambio,
@@ -41,11 +39,10 @@ router.get("/api/guardias/:id_usuario", consultarGuardiasAsignadas);
 
 // --- NUEVAS RUTAS: ASIGNACIÓN MASIVA DE GUARDIAS ---
 
-// Configuración: recibe mes, año y reglas de distribución (Contrato 3).
-router.post("/api/asignacion/configurar", configurarParametrosDistribucion);
-
-// Generación: ejecuta el algoritmo de asignación automática (Contrato 4).
-router.post("/api/asignacion/generar", asignarGuardiasAutomaticamente);
+router.post(
+  "/api/asignacion/ejecutar",
+  asignarGuardiasAutomaticamente
+);
 
 // --- RUTAS DE GESTIÓN DE PERSONAL (ADMINISTRADOR) ---
 

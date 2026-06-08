@@ -14,11 +14,9 @@ export default function VistaAsignacionAutomatica() {
   } = useAsignacionAutomatica();
 
   const { especialidades, cargando: cargandoCat } = useEspecialidades();
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    const confirmado = window.confirm('¿Desea generar automáticamente las guardias?');
-    if (confirmado) generar();
+    generar();
   };
 
   return (
