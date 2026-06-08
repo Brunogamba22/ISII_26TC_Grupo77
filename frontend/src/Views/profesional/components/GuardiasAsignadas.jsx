@@ -5,6 +5,44 @@ import { apiRequest } from "../../../apiClient";
 import GuardiasCard from "./GuardiasCard";
 
 // ============================================================
+// COMPONENTE DE NOTIFICACIÓN TOAST
+// ============================================================
+const ToastNotification = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const styles = {
+    success: "bg-green-500 text-white",
+    error: "bg-red-500 text-white",
+    info: "bg-blue-500 text-white",
+    warning: "bg-yellow-500 text-white",
+  };
+
+  const icons = {
+    success: "✅",
+    error: "❌",
+    info: "ℹ️",
+    warning: "⚠️",
+  };
+
+  return (
+    <div className="fixed bottom-5 right-5 z-50 animate-slide-up">
+      <div className={`${styles[type]} rounded-xl shadow-lg p-4 min-w-[280px] flex items-center gap-3`}>
+        <span className="text-2xl">{icons[type]}</span>
+        <p className="font-medium flex-1">{message}</p>
+        <button onClick={onClose} className="hover:opacity-70">
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================
 // COMPONENTE PRINCIPAL
 // ============================================================
 /**
@@ -26,6 +64,7 @@ const GuardiasAsignadas = ({
   const [cargando, setCargando] = useState(true);    // Control de carga
   const [error, setError] = useState("");            // Mensaje de error
   const [filtroActivo, setFiltroActivo] = useState("asignadas"); // 'asignadas' | 'pendientes'
+  const [toast, setToast] = useState(null);          // Estado para notificaciones
 
   // ============================================================
   // EFECTO: Cargar guardias al montar o cambiar id_usuario
@@ -55,29 +94,44 @@ const GuardiasAsignadas = ({
   }, [id_usuario, onGuardiasCargadas]);
 
   // ============================================================
-  // FUNCIÓN: Cancelar solicitud pendiente
+  // FUNCIÓN: Cancelar solicitud pendiente (con notificación mejorada)
   // ============================================================
   const cancelarSolicitud = async (id_guardia) => {
     try {
       if (!window.confirm("¿Desea cancelar la solicitud?")) return;
+      
       const { response, data } = await apiRequest(
         `/solicitudes/cancelar/${id_guardia}`,
         { method: "PUT" }
       );
+      
       if (!response.ok) {
-        alert(data?.error || "No se pudo cancelar");
+        setToast({
+          message: data?.error || "No se pudo cancelar",
+          type: "error"
+        });
         return;
       }
+      
       // Actualiza el estado local sin recargar toda la lista
       setGuardias((prev) =>
         prev.map((g) =>
           g.id_guardia === id_guardia ? { ...g, estado: "asignada" } : g
         )
       );
-      alert("Solicitud cancelada correctamente");
+      
+      // Notificación de éxito
+      setToast({
+        message: "Solicitud cancelada correctamente",
+        type: "success"
+      });
+      
     } catch (err) {
       console.error(err);
-      alert("Error al cancelar solicitud");
+      setToast({
+        message: "Error al cancelar solicitud",
+        type: "error"
+      });
     }
   };
 
@@ -119,6 +173,15 @@ const GuardiasAsignadas = ({
   // ============================================================
   return (
     <div className="space-y-8">
+      {/* NOTIFICACIÓN TOAST */}
+      {toast && (
+        <ToastNotification
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* CABECERA */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800">Gestión de Reemplazos</h1>
@@ -170,7 +233,7 @@ const GuardiasAsignadas = ({
           guardiasFiltradas.map((guardia) => (
             <div
               key={guardia.id_guardia}
-              className="cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
+              className="transition-transform duration-200 hover:scale-[1.01]"
             >
               <GuardiasCard
                 guardia={guardia}
@@ -194,6 +257,33 @@ const GuardiasAsignadas = ({
           Ir al Inicio
         </button>
       </div>
+
+
+
+
+
+
+
+
+
+
+
+      {/* ESTILOS ADICIONALES PARA LA ANIMACIÓN DEL TOAST */}
+      <style jsx>{`
+        @keyframes slide-up {
+          from {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };

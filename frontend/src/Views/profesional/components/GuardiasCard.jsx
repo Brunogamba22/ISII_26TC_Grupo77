@@ -61,6 +61,7 @@ function formatearFechaBonita(fechaStr) {
  * - Fecha formateada
  * - Horario
  * - Estado (asignada o pendiente)
+ * - Motivo de la solicitud (si es pendiente)
  * - Botón de acción (solicitar cambio / cancelar solicitud)
  */
 function GuardiasCard({ guardia, onCancelarSolicitud, onSolicitarCambio }) {
@@ -103,7 +104,7 @@ function GuardiasCard({ guardia, onCancelarSolicitud, onSolicitarCambio }) {
       </div>
 
       {/* Estado */}
-      <div className="mb-6">
+      <div className="mb-4">
         {esPendiente ? (
           <span className="inline-flex items-center gap-1.5 bg-yellow-200 text-yellow-900 px-4 py-1.5 rounded-full text-sm font-semibold">
             ⏳ Solicitud pendiente
@@ -114,6 +115,18 @@ function GuardiasCard({ guardia, onCancelarSolicitud, onSolicitarCambio }) {
           </span>
         )}
       </div>
+
+      {/* MOSTRAR MOTIVO si es pendiente y existe */}
+      {esPendiente && guardia.motivo && (
+        <div className="mb-4 p-3 bg-white/50 rounded-xl border border-yellow-100">
+          <p className="text-xs font-semibold text-yellow-700 mb-1 flex items-center gap-1">
+            📝 Motivo de la solicitud:
+          </p>
+          <p className="text-sm text-gray-700 italic">
+            "{guardia.motivo}"
+          </p>
+        </div>
+      )}
 
       {/* Botón de acción */}
       <button

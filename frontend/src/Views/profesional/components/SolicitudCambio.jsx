@@ -85,7 +85,7 @@ const SolicitudCambio = ({
         return;
       }
 
-      setMensaje("✅ Solicitud enviada correctamente");
+      setMensaje("Solicitud enviada correctamente");
       setMotivo("");
 
       setTimeout(() => {
@@ -151,17 +151,20 @@ const SolicitudCambio = ({
           />
         </div>
 
-        {/* MENSAJE DE RESPUESTA */}
+        {/* MENSAJE DE RESPUESTA - Estilo mejorado */}
         {mensaje && (
           <div
-            className={`p-4 rounded-xl text-sm flex items-center gap-2 ${
+            className={`p-4 rounded-xl text-sm flex items-center gap-2 animate-slide-down ${
               mensaje.includes("correctamente")
                 ? "bg-green-50 text-green-700 border border-green-200"
                 : "bg-red-50 text-red-700 border border-red-200"
             }`}
           >
-            <span>{mensaje.includes("correctamente") ? "✅" : "⚠️"}</span>
-            {mensaje}
+            <span className="text-xl">{mensaje.includes("correctamente") ? "✅" : "⚠️"}</span>
+            <span className="flex-1">{mensaje}</span>
+            <button onClick={() => setMensaje("")} className="hover:opacity-70">
+              ✕
+            </button>
           </div>
         )}
 
