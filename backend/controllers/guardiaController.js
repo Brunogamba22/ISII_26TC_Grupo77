@@ -100,11 +100,17 @@ async function previsualizarAsignacion(req, res) {
         new AsignacionEquitativa()
       );
 
+      const reglasFinal = {
+        ...reglas,
+        mes: Number(mes),
+        anio: Number(anio),
+      };
+
     const turnosGenerados =
       motor.ejecutar(
         profesionales,
         diasDelMes,
-        reglas
+        reglasFinal
       );
 
     return res.status(200).json({
@@ -129,8 +135,8 @@ async function previsualizarAsignacion(req, res) {
                 ? `${profesional.nombre} ${profesional.apellido}`
                 : "Profesional desconocido",
 
-            horario:
-              "08:00 - 20:00",
+                hora_inicio: reglas.horaInicio || req.body.horaInicio || "08:00",
+                hora_fin: reglas.horaFin || req.body.horaFin || "20:00",
 
             estado:
               "BORRADOR"
@@ -173,7 +179,9 @@ async function confirmarAsignacion(req, res) {
       anio,
       id_especialidad,
       reglas,
-      turnos
+      turnos,
+      horaInicio,
+      horaFin
     } = req.body;
 
     if (
@@ -188,11 +196,7 @@ async function confirmarAsignacion(req, res) {
       });
     }
 
-    const diasDelMes = new Date(
-      anio,
-      Number(mes),
-      0
-    ).getDate();
+    
 
     connection = await db.getConnection();
 
@@ -323,8 +327,8 @@ async function confirmarAsignacion(req, res) {
         `,
         [
           fecha,
-          "08:00:00",
-          "20:00:00",
+          `${horaInicio}:00`,
+          `${horaFin}:00`,
           "asignada",
           id_calendario,
           id_especialidad,

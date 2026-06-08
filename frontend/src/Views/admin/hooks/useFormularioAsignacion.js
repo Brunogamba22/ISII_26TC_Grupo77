@@ -9,6 +9,8 @@ const FORM_INICIAL = {
   evitarEspecialidadesCriticas: true,
   observaciones: '',
   especialidadSeleccionada: '',
+  horaInicio: '08:00', // Valor por defecto
+  horaFin: '20:00'     // Valor por defecto
 };
 
 export function useFormularioAsignacion() {

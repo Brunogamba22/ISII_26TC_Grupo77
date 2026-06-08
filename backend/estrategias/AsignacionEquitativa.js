@@ -16,9 +16,11 @@ class AsignacionEquitativa {
         }
 
         const conteoTurnos = {};
+        const conteoFinDeSemana = {};
 
         profesionales.forEach((prof) => {
             conteoTurnos[prof.id_usuario] = 0;
+            conteoFinDeSemana[prof.id_usuario] = 0;
         });
 
         const calendarioAsignado = [];
@@ -42,23 +44,50 @@ class AsignacionEquitativa {
                 elegibles = [...profesionales];
             }
 
-            elegibles.sort(
-                (a, b) =>
+            const diaSemana = new Date(
+                reglas.anio,
+                reglas.mes - 1,
+                dia
+            ).getDay();
+            
+            const esFinDeSemana =
+                diaSemana === 0 || diaSemana === 6;
+            
+            elegibles.sort((a, b) => {
+                if (
+                    reglas.equidadFinesSemana &&
+                    esFinDeSemana
+                ) {
+                    const diffFDS =
+                        conteoFinDeSemana[a.id_usuario] -
+                        conteoFinDeSemana[b.id_usuario];
+            
+                    if (diffFDS !== 0) return diffFDS;
+                }
+            
+                return (
                     conteoTurnos[a.id_usuario] -
                     conteoTurnos[b.id_usuario]
-            );
-
+                );
+            });
+            
             const elegido = elegibles[0];
-
+            
             calendarioAsignado.push({
                 dia,
                 id_usuario: elegido.id_usuario,
                 nombre_profesional:
-                    `${elegido.nombre} ${elegido.apellido}`
+                    `${elegido.nombre} ${elegido.apellido}`,
+                hora_inicio: reglas.horaInicio || "08:00",
+                hora_fin: reglas.horaFin || "20:00"
             });
-
+            
             conteoTurnos[elegido.id_usuario]++;
-
+            
+            if (esFinDeSemana) {
+                conteoFinDeSemana[elegido.id_usuario]++;
+            }
+            
             historialAsignaciones.push(
                 elegido.id_usuario
             );

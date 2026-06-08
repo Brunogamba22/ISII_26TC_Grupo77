@@ -106,9 +106,10 @@ export default function CronogramaGenerado({
       <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
 
         {turnos.map((turno, index) => (
-
+          
           <div
             key={turnoKey(turno, index)}
+            
             className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors"
           >
 
@@ -140,7 +141,9 @@ export default function CronogramaGenerado({
                 <Clock className="w-4 h-4" />
 
                 <span>
-                  {turno.horario || '08:00 a 20:00'}
+                  {turno.hora_inicio && turno.hora_fin 
+                      ? `${turno.hora_inicio.substring(0, 5)} - ${turno.hora_fin.substring(0, 5)}`
+                      : (turno.horario || '08:00 - 20:00')}
                 </span>
 
               </div>

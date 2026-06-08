@@ -31,62 +31,52 @@ export default function FormularioAsignacion({
       </div>
 
       <form onSubmit={onSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <label htmlFor="mes" className="block text-sm font-medium text-gray-700">
-              Mes
-            </label>
-            <select
-              id="mes"
-              value={formulario.mes}
-              onChange={(e) => actualizarCampo('mes', e.target.value)}
-              disabled={cargando}
-              className={inputClass}
-            >
-              <option value="">Seleccione mes</option>
-              {opcionesMeses.map((m) => (
-                <option key={m.numero} value={m.numero}>
-                  {m.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="space-y-2">
+      <label htmlFor="mes" className="block text-sm font-medium text-gray-700">Mes</label>
+      <select id="mes" value={formulario.mes} onChange={(e) => actualizarCampo('mes', e.target.value)} disabled={cargando} className={inputClass}>
+        <option value="">Seleccione mes</option>
+        {opcionesMeses.map((m) => (<option key={m.numero} value={m.numero}>{m.nombre}</option>))}
+      </select>
+    </div>
 
-          <div className="space-y-2">
-            <label htmlFor="anio" className="block text-sm font-medium text-gray-700">
-              Año
-            </label>
-            <input
-              id="anio"
-              type="number"
-              value={formulario.anio}
-              onChange={(e) => actualizarCampo('anio', Number(e.target.value))}
-              disabled={cargando}
-              min={ANIO_MINIMO}
-              className={inputClass}
-            />
-          </div>
+    <div className="space-y-2">
+      <label htmlFor="anio" className="block text-sm font-medium text-gray-700">Año</label>
+      <input id="anio" type="number" value={formulario.anio} onChange={(e) => actualizarCampo('anio', Number(e.target.value))} disabled={cargando} min={ANIO_MINIMO} className={inputClass} />
+    </div>
 
-          <div className="space-y-2">
-            <label htmlFor="especialidad" className="block text-sm font-medium text-gray-700">
-              Especialidad
-            </label>
-            <select
-              id="especialidad"
-              value={formulario.especialidadSeleccionada}
-              onChange={(e) => actualizarCampo('especialidadSeleccionada', e.target.value)}
-              disabled={cargando}
-              className={inputClass}
-            >
-              <option value="">{cargandoCat ? 'Cargando...' : 'Seleccione'}</option>
-              {especialidades.map((esp) => (
-                <option key={esp.id_especialidad} value={esp.id_especialidad}>
-                  {esp.descripcion}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+    <div className="space-y-2">
+      <label htmlFor="especialidad" className="block text-sm font-medium text-gray-700">Especialidad</label>
+      <select id="especialidad" value={formulario.especialidadSeleccionada} onChange={(e) => actualizarCampo('especialidadSeleccionada', e.target.value)} disabled={cargando} className={inputClass}>
+        <option value="">{cargandoCat ? 'Cargando...' : 'Seleccione'}</option>
+        {especialidades.map((esp) => (<option key={esp.id_especialidad} value={esp.id_especialidad}>{esp.descripcion}</option>))}
+      </select>
+    </div>
+  </div>
+
+  {/* Bloque de Horarios (Ahora alineado con el ancho total del formulario) */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">Hora Inicio</label>
+      <input
+        type="time"
+        value={formulario.horaInicio}
+        onChange={(e) => actualizarCampo('horaInicio', e.target.value)}
+        disabled={cargando}
+        className={inputClass}
+      />
+    </div>
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">Hora Fin</label>
+      <input
+        type="time"
+        value={formulario.horaFin}
+        onChange={(e) => actualizarCampo('horaFin', e.target.value)}
+        disabled={cargando}
+        className={inputClass}
+      />
+    </div>
+  </div>
 
         <div className="pt-6 border-t border-gray-100">
           <div className="flex items-center gap-2 mb-4">

@@ -75,6 +75,8 @@ export function useAsignacionAutomatica() {
         mes,
         anio,
         especialidadSeleccionada,
+        horaInicio, 
+        horaFin,
         ...reglas
       } = formulario;
 
@@ -85,6 +87,8 @@ export function useAsignacionAutomatica() {
           id_especialidad: Number(
             especialidadSeleccionada
           ),
+          horaInicio,
+          horaFin,
           reglas: construirReglas(reglas),
         });
 
@@ -143,6 +147,8 @@ export function useAsignacionAutomatica() {
         mes,
         anio,
         especialidadSeleccionada,
+        horaInicio,
+        horaFin,
         ...reglas
       } = formulario;
 
@@ -153,6 +159,8 @@ export function useAsignacionAutomatica() {
           id_especialidad: Number(
             especialidadSeleccionada
           ),
+          horaInicio,
+          horaFin,
           reglas: construirReglas(reglas),
           turnos: turnosPendientes,
         });
