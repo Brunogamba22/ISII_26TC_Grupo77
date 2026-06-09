@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const db = require("../models/db"); // Tu Singleton de conexión a MySQL
 const MotorDeAsignacion = require('../estrategias/MotorDeAsignacion');
 const AsignacionEquitativa = require('../estrategias/AsignacionEquitativa');
@@ -6,14 +5,6 @@ const AsignacionEquitativa = require('../estrategias/AsignacionEquitativa');
 /**
  * Controlador: consulta guardias asignadas a un profesional.
  * Incluye el motivo de la solicitud si existe una solicitud pendiente.
-=======
-const db = require("../models/db");
-const MotorDeAsignacion = require("../estrategias/MotorDeAsignacion");
-const AsignacionEquitativa = require("../estrategias/AsignacionEquitativa");
-
-/**
- * Controlador: consulta guardias asignadas a un profesional.
->>>>>>> joni
  */
 async function consultarGuardiasAsignadas(req, res) {
   try {
@@ -21,7 +12,6 @@ async function consultarGuardiasAsignadas(req, res) {
 
     const [guardias] = await db.query(
       `
-<<<<<<< HEAD
       SELECT 
         g.id_guardia,
         g.fecha,
@@ -36,17 +26,6 @@ async function consultarGuardiasAsignadas(req, res) {
       WHERE g.id_usuario = ?
       AND g.estado IN ('asignada','pendiente')
       ORDER BY g.fecha ASC
-=======
-      SELECT
-        id_guardia,
-        fecha,
-        hora_inicio,
-        hora_fin,
-        estado
-      FROM guardia
-      WHERE id_usuario = ?
-      ORDER BY fecha ASC
->>>>>>> joni
       `,
       [id_usuario]
     );
@@ -188,10 +167,6 @@ async function previsualizarAsignacion(req, res) {
 
 /**
  * Controlador: Asignar guardias automáticamente (Contrato 4).
-<<<<<<< HEAD
-=======
- *
->>>>>>> joni
  * Responsabilidades:
  * - Consultar profesionales disponibles por especialidad.
  * - Recuperar reglas configuradas por el administrador.
@@ -225,22 +200,6 @@ async function confirmarAsignacion(req, res) {
         error: "Faltan parámetros requeridos para la generación."
       });
     }
-<<<<<<< HEAD
-    
-    // 5. Iterar sobre los turnos generados y hacer el INSERT
-    for (const turno of turnosGenerados) {
-      // Formateamos mes y día para que siempre tengan 2 dígitos (ej: '05' en vez de '5')
-      const mesFormateado = String(mes).padStart(2, '0');
-      const diaFormateado = String(turno.dia).padStart(2, '0');
-      
-      // Armamos la fecha en formato YYYY-MM-DD exigido por MySQL
-      const fecha = `${anio}-${mesFormateado}-${diaFormateado}`;
-      
-      const hora_inicio = '08:00:00';
-      const hora_fin = '20:00:00';
-      const estado = 'asignada';
-=======
->>>>>>> joni
 
     
 
