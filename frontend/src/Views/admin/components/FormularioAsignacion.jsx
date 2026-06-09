@@ -119,40 +119,6 @@ export default function FormularioAsignacion({
               </div>
             </label>
 
-            <label className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
-              <input
-                type="checkbox"
-                checked={formulario.evitarEspecialidadesCriticas}
-                onChange={() =>
-                  actualizarCampo('evitarEspecialidadesCriticas', !formulario.evitarEspecialidadesCriticas)
-                }
-                disabled={cargando}
-                className="mt-0.5 w-5 h-5 rounded border-gray-300 text-cyan-600 focus:ring-2 focus:ring-cyan-500 cursor-pointer accent-cyan-600"
-              />
-              <div>
-                <span className="block text-sm font-medium text-gray-800">
-                  Evitar colisiones con especialidades críticas
-                </span>
-                <span className="block text-xs text-gray-500 mt-0.5">
-                  Previene solapamientos con áreas de alta demanda.
-                </span>
-              </div>
-            </label>
-
-            <div className="space-y-2">
-              <label htmlFor="observaciones" className="block text-sm font-medium text-gray-700">
-                Observaciones
-              </label>
-              <textarea
-                id="observaciones"
-                value={formulario.observaciones}
-                onChange={(e) => actualizarCampo('observaciones', e.target.value)}
-                disabled={cargando}
-                rows={3}
-                placeholder="Notas o consideraciones especiales para esta asignación..."
-                className={`${inputClass} resize-none placeholder-gray-400`}
-              />
-            </div>
           </div>
         </div>
 

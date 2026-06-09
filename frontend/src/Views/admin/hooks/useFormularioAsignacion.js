@@ -6,8 +6,6 @@ const FORM_INICIAL = {
   anio: new Date().getFullYear(),
   maxGuardiasConsecutivas: DEFAULT_MAX_GUARDIAS,
   equidadFinesSemana: true,
-  evitarEspecialidadesCriticas: true,
-  observaciones: '',
   especialidadSeleccionada: '',
   horaInicio: '08:00', // Valor por defecto
   horaFin: '20:00'     // Valor por defecto
