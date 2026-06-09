@@ -1,11 +1,10 @@
-
 const db = require("../models/db"); // Tu Singleton de conexión a MySQL
 const MotorDeAsignacion = require('../estrategias/MotorDeAsignacion');
 const AsignacionEquitativa = require('../estrategias/AsignacionEquitativa');
 
 /**
  * Controlador: consulta guardias asignadas a un profesional.
- * (Sprint 1 - Datos simulados en memoria)
+ * Incluye el motivo de la solicitud si existe una solicitud pendiente.
  */
 async function consultarGuardiasAsignadas(req, res) {
   try {
@@ -14,15 +13,19 @@ async function consultarGuardiasAsignadas(req, res) {
     const [guardias] = await db.query(
       `
       SELECT 
-        id_guardia,
-        fecha,
-        hora_inicio,
-        hora_fin,
-        estado
-      FROM guardia
-      WHERE id_usuario = ?
-      AND estado IN ('asignada','pendiente')
-      ORDER BY fecha ASC
+        g.id_guardia,
+        g.fecha,
+        g.hora_inicio,
+        g.hora_fin,
+        g.estado,
+        r.motivo  --  INCLUIMOS EL MOTIVO DESDE LA TABLA reemplazo
+      FROM guardia g
+      LEFT JOIN reemplazo r 
+        ON g.id_guardia = r.id_guardia 
+        AND r.estado = 'pendiente'  -- Solo trae el motivo si hay solicitud pendiente
+      WHERE g.id_usuario = ?
+      AND g.estado IN ('asignada','pendiente')
+      ORDER BY g.fecha ASC
       `,
       [id_usuario]
     );
@@ -50,10 +53,9 @@ async function consultarGuardiasAsignadas(req, res) {
   }
 }
 
-
 /**
  * Controlador: Asignar guardias automáticamente (Contrato 4).
- * * Responsabilidades:
+ * Responsabilidades:
  * - Consultar profesionales disponibles por especialidad.
  * - Validar que existan suficientes profesionales.
  * - Ejecutar el motor de asignación (Patrón Estrategia).
@@ -98,6 +100,7 @@ async function asignarGuardiasAutomaticamente(req, res) {
         error: "Ya existen guardias generadas para este calendario."
       });
     }
+    
     // 5. Iterar sobre los turnos generados y hacer el INSERT
     for (const turno of turnosGenerados) {
       // Formateamos mes y día para que siempre tengan 2 dígitos (ej: '05' en vez de '5')

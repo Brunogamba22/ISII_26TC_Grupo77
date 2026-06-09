@@ -4,7 +4,7 @@ import { useState } from "react";
 import { apiRequest } from "../../../apiClient";
 
 // ============================================================
-// HELPERS DE FORMATEO (sin cambios)
+// HELPERS DE FORMATEO
 // ============================================================
 const DIAS_SEMANA = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MESES = [
@@ -48,6 +48,65 @@ function formatearFechaBonita(fechaStr) {
 }
 
 // ============================================================
+// COMPONENTE DE VALIDACIÓN EN TIEMPO REAL
+// ============================================================
+const ValidacionMotivo = ({ motivo }) => {
+  const errores = [];
+  
+  if (!motivo || motivo.trim().length === 0) {
+    errores.push("El motivo es obligatorio");
+  } else {
+    const motivoTrimmed = motivo.trim();
+    const longitud = motivoTrimmed.length;
+    
+    if (longitud < 10) {
+      errores.push(`Mínimo 10 caracteres (actual: ${longitud})`);
+    }
+    
+    if (longitud > 150) {
+      errores.push(`Máximo 150 caracteres (actual: ${longitud})`);
+    }
+    
+    if (/^\d+$/.test(motivoTrimmed)) {
+      errores.push("No puede ser solo números");
+    }
+    
+    const palabras = motivoTrimmed.split(/\s+/).filter(p => p.length > 0);
+    if (palabras.length < 3) {
+      errores.push(`Describe con al menos 3 palabras (actual: ${palabras.length})`);
+    }
+    
+    if (/[<>{}]/.test(motivoTrimmed)) {
+      errores.push("Caracteres no permitidos: < > { }");
+    }
+  }
+  
+  if (errores.length === 0 && motivo && motivo.trim().length > 0) {
+    return (
+      <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+        <span>✅</span>
+        <span>Motivo válido</span>
+      </div>
+    );
+  }
+  
+  if (errores.length > 0 && motivo && motivo.trim().length > 0) {
+    return (
+      <div className="mt-2 space-y-1">
+        {errores.map((error, idx) => (
+          <div key={idx} className="text-xs text-yellow-600 flex items-center gap-1">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  
+  return null;
+};
+
+// ============================================================
 // COMPONENTE PRINCIPAL
 // ============================================================
 const SolicitudCambio = ({
@@ -60,18 +119,42 @@ const SolicitudCambio = ({
   const [motivo, setMotivo] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [touched, setTouched] = useState(false);
+
+  // Validar si el motivo es válido
+  const esMotivoValido = () => {
+    if (!motivo || motivo.trim().length === 0) return false;
+    const motivoTrimmed = motivo.trim();
+    if (motivoTrimmed.length < 10) return false;
+    if (motivoTrimmed.length > 150) return false;
+    if (/^\d+$/.test(motivoTrimmed)) return false;
+    const palabras = motivoTrimmed.split(/\s+/).filter(p => p.length > 0);
+    if (palabras.length < 3) return false;
+    if (/[<>{}]/.test(motivoTrimmed)) return false;
+    return true;
+  };
 
   // ============================================================
   // MANEJAR ENVÍO DEL FORMULARIO
   // ============================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setTouched(true);
+    
+    // Validación local antes de enviar
+    if (!esMotivoValido()) {
+      setMensaje("⚠️ Por favor, corrija los errores del motivo antes de enviar");
+      return;
+    }
+    
     try {
       setEnviando(true);
+      setMensaje("");
+      
       const { response, data } = await apiRequest("/solicitudes", {
         method: "POST",
         body: {
-          motivo,
+          motivo: motivo.trim(),
           id_guardia: guardiaSeleccionada.id_guardia,
           id_usuario: usuario.id_usuario,
         },
@@ -81,19 +164,28 @@ const SolicitudCambio = ({
       console.log(data);
 
       if (!response.ok) {
-        setMensaje(data?.error || "No se pudo enviar la solicitud");
+        // Manejo detallado de errores del backend
+        if (data.details && data.details.errors) {
+          setMensaje(`❌ ${data.error}\n\n${data.details.errors.join("\n")}`);
+        } else if (data.suggestion) {
+          setMensaje(`❌ ${data.error}\n\n💡 ${data.suggestion}`);
+        } else {
+          setMensaje(`❌ ${data.error || "No se pudo enviar la solicitud"}`);
+        }
         return;
       }
 
-      setMensaje("Solicitud enviada correctamente");
+      setMensaje(" Solicitud enviada correctamente");
       setMotivo("");
+      setTouched(false);
 
       setTimeout(() => {
         onCancelar();
       }, 1500);
+      
     } catch (error) {
       console.error(error);
-      setMensaje(error.message || "Error del servidor");
+      setMensaje(" Error de conexión con el servidor");
     } finally {
       setEnviando(false);
     }
@@ -141,28 +233,59 @@ const SolicitudCambio = ({
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Motivo del cambio
+            <span className="text-red-500 ml-1">*</span>
           </label>
           <textarea
             value={motivo}
-            onChange={(e) => setMotivo(e.target.value)}
+            onChange={(e) => {
+              setMotivo(e.target.value);
+              setTouched(false);
+            }}
+            onBlur={() => setTouched(true)}
             rows="4"
-            placeholder="Explicá brevemente por qué necesitás el reemplazo..."
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"
+            placeholder="Ejemplo: Problemas personales, necesito viajar por emergencia familiar..."
+            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none ${
+              touched && !esMotivoValido() && motivo.trim().length > 0
+                ? "border-yellow-400 bg-yellow-50"
+                : touched && motivo.trim().length === 0
+                ? "border-red-300 bg-red-50"
+                : "border-gray-200"
+            }`}
           />
+          
+          {/* Contador de caracteres */}
+          <div className="mt-1 flex justify-between items-center">
+            <ValidacionMotivo motivo={motivo} />
+            <span className={`text-xs ${motivo.length > 150 ? "text-red-500" : "text-gray-400"}`}>
+              {motivo.length}/150
+            </span>
+          </div>
+          
+          {/* Sugerencia de ejemplo */}
+          {(!motivo || motivo.trim().length === 0) && (
+            <div className="mt-2 text-xs text-gray-400 flex items-center gap-1">
+              <span>💡</span>
+              <span>Ej: "Problemas de salud familiar, necesito ausentarme ese día"</span>
+            </div>
+          )}
         </div>
 
         {/* MENSAJE DE RESPUESTA - Estilo mejorado */}
         {mensaje && (
           <div
-            className={`p-4 rounded-xl text-sm flex items-center gap-2 animate-slide-down ${
-              mensaje.includes("correctamente")
+            className={`p-4 rounded-xl text-sm flex items-start gap-2 animate-slide-down ${
+              mensaje.includes("✅")
                 ? "bg-green-50 text-green-700 border border-green-200"
+                : mensaje.includes("⚠️")
+                ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
                 : "bg-red-50 text-red-700 border border-red-200"
             }`}
           >
-            <span className="text-xl">{mensaje.includes("correctamente") ? "✅" : "⚠️"}</span>
-            <span className="flex-1">{mensaje}</span>
-            <button onClick={() => setMensaje("")} className="hover:opacity-70">
+            <span className="text-xl mt-0.5">
+              {mensaje.includes("✅") ? "✅" : mensaje.includes("⚠️") ? "⚠️" : "❌"}
+            </span>
+            <div className="flex-1 whitespace-pre-line">{mensaje}</div>
+            <button onClick={() => setMensaje("")} className="hover:opacity-70 text-lg leading-none">
               ✕
             </button>
           </div>
@@ -173,7 +296,7 @@ const SolicitudCambio = ({
           {/* Botón Enviar Solicitud */}
           <button
             type="submit"
-            disabled={enviando || !motivo.trim()}
+            disabled={enviando || !motivo.trim() || (touched && !esMotivoValido())}
             className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-md"
           >
             {enviando ? (
