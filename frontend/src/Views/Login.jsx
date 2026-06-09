@@ -1,20 +1,37 @@
+// src/Views/Login.jsx
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, Mail, Lock, Loader2 } from 'lucide-react';
 import { apiRequest } from "../apiClient";
 import { normalizarRol, rutaPorRol } from "../utils/rolCompat";
 
+/**
+ * Pantalla de inicio de sesión.
+ * - Valida credenciales contra el backend.
+ * - Normaliza el rol del usuario.
+ * - Redirige a la ruta correspondiente según el rol.
+ * - Guarda datos básicos de sesión en localStorage.
+ */
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
+
+  // ------------------------------------------------------------
+  // Estados locales del formulario
+  // ------------------------------------------------------------
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mensaje, setMensaje] = useState("");
-  const [cargando, setCargando] = useState(false);
+  const [mensaje, setMensaje] = useState("");       // Feedback de error/éxito
+  const [cargando, setCargando] = useState(false);  // Controla el spinner del botón
 
+  // ------------------------------------------------------------
+  // Manejo del envío del formulario
+  // ------------------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMensaje("");
 
+    // Validación de campos vacíos
     if (!email.trim() || !password.trim()) {
       setMensaje("❌ Datos incompletos. Ingrese email y contraseña.");
       return;
@@ -23,21 +40,25 @@ const Login = ({ onLogin }) => {
     setCargando(true);
 
     try {
+      // Petición de login al backend
       const { response, data } = await apiRequest("/login", {
         method: "POST",
         body: { email, contrasena: password },
       });
 
+      // Credenciales inválidas (401)
       if (response.status === 401) {
         setMensaje(data?.error || "Credenciales inválidas.");
         return;
       }
 
+      // Otro error HTTP
       if (!response.ok) {
         setMensaje(data?.error || "❌ Error al iniciar sesión. Intente nuevamente.");
         return;
       }
 
+      // Extracción de datos del usuario
       const id_usuario = data?.usuario?.id_usuario;
       const rol = normalizarRol(data?.usuario?.rol);
 
@@ -46,12 +67,14 @@ const Login = ({ onLogin }) => {
         return;
       }
 
+      // Determinar la ruta destino según el rol
       const destino = rutaPorRol(rol);
       if (!destino) {
         setMensaje(`❌ Rol no reconocido: "${data?.usuario?.rol}".`);
         return;
       }
 
+      // Construir objeto de sesión y guardarlo en localStorage
       const usuarioSesion = {
         id_usuario: String(id_usuario),
         rol,
@@ -64,13 +87,13 @@ const Login = ({ onLogin }) => {
       localStorage.setItem("rol", usuarioSesion.rol);
       localStorage.setItem("nombre", usuarioSesion.nombre);
 
+      // Notificar al componente padre (si existe la función)
       if (typeof onLogin === "function") {
         onLogin(usuarioSesion);
       }
 
       setMensaje("✅ Inicio de sesión exitoso. Redirigiendo...");
       navigate(destino, { replace: true });
-      
     } catch (error) {
       console.error("Error en autenticación:", error);
       setMensaje("❌ Error de conexión con el servidor. Intente más tarde.");
@@ -79,10 +102,15 @@ const Login = ({ onLogin }) => {
     }
   };
 
+  // ------------------------------------------------------------
+  // Renderizado de la pantalla de login
+  // ------------------------------------------------------------
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-cyan-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        {/* Logo */}
+        {/* ================================================================ */}
+        {/* LOGO Y MARCA */}
+        {/* ================================================================ */}
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-200">
             <Shield className="w-6 h-6 text-white" />
@@ -92,7 +120,9 @@ const Login = ({ onLogin }) => {
           </span>
         </div>
 
-        {/* Tarjeta de Login */}
+        {/* ================================================================ */}
+        {/* TARJETA DE LOGIN */}
+        {/* ================================================================ */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <div className="text-center mb-6">
             <h1 className="text-xl font-semibold text-gray-800 mb-1">Bienvenido de nuevo</h1>
@@ -100,16 +130,26 @@ const Login = ({ onLogin }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Feedback de mensajes */}
+            {/* Feedback de mensajes (éxito o error) */}
             {mensaje && (
-              <div className={`text-sm rounded-xl px-4 py-3 border ${mensaje.startsWith("✅") ? "bg-green-50 border-green-200 text-green-600" : "bg-red-50 border-red-200 text-red-600"}`}>
+              <div
+                className={`text-sm rounded-xl px-4 py-3 border ${
+                  mensaje.startsWith("✅")
+                    ? "bg-green-50 border-green-200 text-green-600"
+                    : "bg-red-50 border-red-200 text-red-600"
+                }`}
+              >
                 {mensaje}
               </div>
             )}
 
-            {/* Email field */}
+            {/* ================================================================ */}
+            {/* CAMPO: EMAIL */}
+            {/* ================================================================ */}
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo electrónico</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Correo electrónico
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="w-5 h-5 text-gray-400" />
@@ -127,9 +167,13 @@ const Login = ({ onLogin }) => {
               </div>
             </div>
 
-            {/* Password field */}
+            {/* ================================================================ */}
+            {/* CAMPO: CONTRASEÑA */}
+            {/* ================================================================ */}
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Contraseña
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="w-5 h-5 text-gray-400" />
@@ -147,7 +191,9 @@ const Login = ({ onLogin }) => {
               </div>
             </div>
 
-            {/* Submit button */}
+            {/* ================================================================ */}
+            {/* BOTÓN DE ENVÍO */}
+            {/* ================================================================ */}
             <button
               type="submit"
               disabled={cargando}
@@ -164,8 +210,10 @@ const Login = ({ onLogin }) => {
             </button>
           </form>
         </div>
-        
-        {/* Footer */}
+
+        {/* ================================================================ */}
+        {/* FOOTER */}
+        {/* ================================================================ */}
         <p className="text-center text-xs text-gray-400 mt-8">
           © 2026 MediGuard Pro. Todos los derechos reservados.
         </p>

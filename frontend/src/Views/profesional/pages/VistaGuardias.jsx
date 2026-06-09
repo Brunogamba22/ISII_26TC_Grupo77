@@ -1,65 +1,55 @@
-import { useState } from "react";
-
+// src/Views/profesional/pages/VistaGuardias.jsx
+import { useState, useMemo } from "react";
 import GuardiasAsignadas from "../components/GuardiasAsignadas";
 import SolicitudCambio from "../components/SolicitudCambio";
 
-function VistaGuardias() {
+/**
+ * Página principal del flujo "Gestión de Reemplazos".
+ * 
+ * Props:
+ * @param {function} setVistaActiva - Función para cambiar la vista activa en el panel profesional.
+ *                                     Normalmente proviene de ProfesionalPanel.
+ */
+function VistaGuardias({ setVistaActiva }) {
+  const usuario = useMemo(
+    () => ({
+      id_usuario: localStorage.getItem("id_usuario"),
+      nombre: localStorage.getItem("nombre"),
+      rol: localStorage.getItem("rol"),
+    }),
+    []
+  );
 
-  const id_usuario =
-    localStorage.getItem("id_usuario");
+  const [guardias, setGuardias] = useState([]);
+  const [guardiaSeleccionada, setGuardiaSeleccionada] = useState(null);
 
-  const nombre =
-    localStorage.getItem("nombre");
-
-  const rol =
-    localStorage.getItem("rol");
-
-  const usuario = {
-    id_usuario,
-    nombre,
-    rol,
+  // Función para volver al inicio: usa el setter global
+  const irAlInicio = () => {
+    if (setVistaActiva) {
+      setVistaActiva("inicio"); // Ajustá este string si tu vista se llama diferente
+    }
   };
 
-  const [guardias, setGuardias] =
-    useState([]);
-
-  const [
-    guardiaSeleccionada,
-    setGuardiaSeleccionada,
-  ] = useState(null);
-
   return (
-    <div className="space-y-6">
-
-      {
-        !guardiaSeleccionada ? (
-
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        {!guardiaSeleccionada ? (
           <GuardiasAsignadas
-            id_usuario={id_usuario}
-            onSeleccionarGuardia={
-              setGuardiaSeleccionada
-            }
-            onGuardiasCargadas={
-              setGuardias
-            }
+            id_usuario={usuario.id_usuario}
+            onSeleccionarGuardia={setGuardiaSeleccionada}
+            onGuardiasCargadas={setGuardias}
+            irAlInicio={irAlInicio}   //  Se pasa la función
           />
-
         ) : (
-
           <SolicitudCambio
             usuario={usuario}
-            guardiaSeleccionada={
-              guardiaSeleccionada
-            }
+            guardiaSeleccionada={guardiaSeleccionada}
             guardias={guardias}
-            onCancelar={() =>
-              setGuardiaSeleccionada(null)
-            }
+            onCancelar={() => setGuardiaSeleccionada(null)}
+            irAlInicio={irAlInicio}   // Se pasa la función
           />
-
-        )
-      }
-
+        )}
+      </div>
     </div>
   );
 }

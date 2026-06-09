@@ -1,3 +1,4 @@
+// src/Views/profesional/ProfesionalPanel.jsx
 import { useState } from 'react';
 
 import {
@@ -15,7 +16,13 @@ import VistaGuardias from './pages/VistaGuardias';
 import '../../styles/profesional.css'
 
 
-// Panel Profesional Principal
+/**
+ * Panel Profesional Principal
+ * 
+ * Maneja la navegación interna mediante un estado `vistaActiva`.
+ * Cada vista recibe la función `setVistaActiva` para poder cambiar la pantalla activa
+ * (por ejemplo, volver al inicio desde la vista de guardias).
+ */
 export default function ProfesionalPanel() {
   const [vistaActiva, setVistaActiva] = useState('inicio');
 
@@ -41,13 +48,14 @@ export default function ProfesionalPanel() {
         return <VistaAgenda />;
 
       case 'guardias':
-        return <VistaGuardias />;
+        // ✅ Pasamos setVistaActiva para que VistaGuardias pueda llamar a irAlInicio
+        return <VistaGuardias setVistaActiva={setVistaActiva} />;
 
       case 'perfil':
         return <VistaPerfil />;
 
       default:
-        return <VistaInicio />;
+        return <VistaInicio setVistaActiva={setVistaActiva} />;
     }
   };
 

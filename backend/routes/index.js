@@ -11,6 +11,7 @@ const {
 
 const {
   crearSolicitudDeCambio,
+  cancelarSolicitud
 } = require("../controllers/solicitudController");
 
 const {
@@ -35,6 +36,11 @@ router.post("/api/login", validarCredenciales);
 
 // Solicitudes: registra una solicitud de cambio de guardia (alta).
 router.post("/api/solicitudes", crearSolicitudDeCambio);
+router.put(
+  "/api/solicitudes/cancelar/:id_guardia",
+  cancelarSolicitud
+);
+
 
 // Guardia: consulta guardias asignadas por id de usuario (lectura).
 router.get("/api/guardias/:id_usuario", consultarGuardiasAsignadas);
