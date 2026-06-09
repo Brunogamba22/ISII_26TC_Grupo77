@@ -57,6 +57,8 @@ async function previsualizarAsignacion(req, res) {
       mes,
       anio,
       id_especialidad,
+      horaInicio,
+      horaFin,
       reglas = {}
     } = req.body;
 
@@ -141,8 +143,8 @@ async function previsualizarAsignacion(req, res) {
                 ? `${profesional.nombre} ${profesional.apellido}`
                 : "Profesional desconocido",
 
-                hora_inicio: reglas.horaInicio || req.body.horaInicio || "08:00",
-                hora_fin: reglas.horaFin || req.body.horaFin || "20:00",
+                hora_inicio: horaInicio || "08:00",
+                hora_fin: horaFin  || "20:00",
 
             estado:
               "BORRADOR"

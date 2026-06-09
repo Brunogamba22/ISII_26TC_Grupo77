@@ -41,12 +41,6 @@ export function useAsignacionAutomatica() {
 
     equidadFinesSemana:
       reglas.equidadFinesSemana,
-
-    evitarEspecialidadesCriticas:
-      reglas.evitarEspecialidadesCriticas,
-
-    observaciones:
-      reglas.observaciones,
   });
 
   const previsualizar = async () => {
