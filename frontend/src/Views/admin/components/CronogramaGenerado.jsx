@@ -17,6 +17,7 @@ export default function CronogramaGenerado({
   turnos = [],
   esPrevisualizacion = false,
   onConfirmar,
+  onRechazar,
   onExportar = () => window.print(),
 }) {
 
@@ -166,18 +167,27 @@ export default function CronogramaGenerado({
 
       {esPrevisualizacion && (
 
-        <div className="mt-6">
+      <div className="mt-6 flex flex-col gap-3">
 
-          <button
-            type="button"
-            onClick={onConfirmar}
-            className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-4 rounded-xl transition-colors"
-          >
-            <Save className="w-5 h-5" />
-            Confirmar y Guardar Cronograma
-          </button>
+        <button
+          type="button"
+          onClick={onConfirmar}
+          className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-4 rounded-xl transition-colors"
+        >
+          <Save className="w-5 h-5" />
+          Confirmar y Guardar Cronograma
+        </button>
 
-        </div>
+        <button
+          type="button"
+          onClick={onRechazar}
+          className="w-full flex items-center justify-center gap-2 bg-white hover:bg-red-50 text-red-600 border border-red-200 font-semibold px-6 py-4 rounded-xl transition-colors"
+        >
+          <AlertTriangle className="w-5 h-5" />
+          Rechazar Cronograma
+        </button>
+
+      </div>
 
       )}
 

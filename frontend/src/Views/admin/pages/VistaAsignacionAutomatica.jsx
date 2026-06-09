@@ -13,7 +13,8 @@ export default function VistaAsignacionAutomatica() {
     turnosPendientes,
     cargando,
     previsualizar,
-    confirmarCronograma
+    confirmarCronograma,
+    rechazarCronograma,
   } = useAsignacionAutomatica();
 
   const {
@@ -62,6 +63,9 @@ export default function VistaAsignacionAutomatica() {
           }
           onConfirmar={
             confirmarCronograma
+          }
+          onRechazar={
+            rechazarCronograma
           }
         />
 

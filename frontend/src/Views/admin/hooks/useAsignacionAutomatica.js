@@ -206,6 +206,14 @@ export function useAsignacionAutomatica() {
     }
   };
 
+  const rechazarCronograma = () => {
+    setTurnosPendientes([]);
+    setFeedback({
+      tipo: null,
+      texto: '',
+    });
+  };
+
   return {
     formulario,
     actualizarCampo,
@@ -218,5 +226,6 @@ export function useAsignacionAutomatica() {
 
     previsualizar,
     confirmarCronograma,
+    rechazarCronograma
   };
 }

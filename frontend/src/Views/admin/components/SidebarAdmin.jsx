@@ -4,7 +4,7 @@ import { adminMenuItems } from '../config/adminMenu';
 
 export default function SidebarAdmin() {
   return (
-    <aside className="w-64 bg-gradient-to-b from-cyan-100 to-cyan-50 min-h-screen p-4 flex flex-col">
+    <aside className="w-64 bg-gradient-to-b from-cyan-100 to-cyan-50 h-screen sticky top-0 p-4 flex flex-col">
       <div className="flex items-center gap-3 px-4 py-4 mb-6">
         <div className="text-cyan-600">
           <Shield size={32} />
