@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Shield } from 'lucide-react';
+import { Shield, LogOut } from 'lucide-react';
 import { adminMenuItems } from '../config/adminMenu';
 
 export default function SidebarAdmin() {
@@ -37,6 +37,20 @@ export default function SidebarAdmin() {
           );
         })}
       </nav>
+
+      <div className="mt-auto pt-4">
+        <button
+          onClick={() => {
+            localStorage.clear();
+            window.location.href = '/login';
+          }}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left text-red-600 hover:bg-red-50 hover:text-red-700 font-medium bg-transparent shadow-none border-none"
+          style={{ margin: 0 }}
+        >
+          <LogOut size={20} />
+          <span className="text-sm">Cerrar Sesión</span>
+        </button>
+      </div>
     </aside>
   );
 }

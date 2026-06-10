@@ -6,7 +6,8 @@ import {
   Home,
   Calendar,
   RefreshCw,
-  User
+  User,
+  LogOut
 } from 'lucide-react';
 
 import VistaInicio from './pages/VistaInicio';
@@ -108,6 +109,20 @@ export default function ProfesionalPanel() {
             );
           })}
         </nav>
+
+        <div className="mt-auto pt-4">
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.href = '/login';
+            }}
+            className="w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all duration-200 text-left text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold bg-transparent shadow-none border-none"
+            style={{ margin: 0 }}
+          >
+            <LogOut size={22} />
+            <span className="text-sm">Cerrar Sesión</span>
+          </button>
+        </div>
       </aside>
 
       {/* Contenido Principal */}
