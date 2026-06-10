@@ -175,7 +175,8 @@ const SolicitudCambio = ({
         return;
       }
 
-      setMensaje(" Solicitud enviada correctamente");
+      // ✅ CORREGIDO: Mensaje de éxito con emoji y texto claro
+      setMensaje("✅ Solicitud enviada correctamente");
       setMotivo("");
       setTouched(false);
 
@@ -185,7 +186,7 @@ const SolicitudCambio = ({
       
     } catch (error) {
       console.error(error);
-      setMensaje(" Error de conexión con el servidor");
+      setMensaje("❌ Error de conexión con el servidor");
     } finally {
       setEnviando(false);
     }
@@ -270,10 +271,10 @@ const SolicitudCambio = ({
           )}
         </div>
 
-        {/* MENSAJE DE RESPUESTA - Estilo mejorado */}
+        {/* MENSAJE DE RESPUESTA */}
         {mensaje && (
           <div
-            className={`p-4 rounded-xl text-sm flex items-start gap-2 animate-slide-down ${
+            className={`p-4 rounded-xl text-sm flex items-start gap-2 ${
               mensaje.includes("✅")
                 ? "bg-green-50 text-green-700 border border-green-200"
                 : mensaje.includes("⚠️")
@@ -281,16 +282,15 @@ const SolicitudCambio = ({
                 : "bg-red-50 text-red-700 border border-red-200"
             }`}
           >
-            <span className="text-xl mt-0.5">
-              {mensaje.includes("✅") ? "✅" : mensaje.includes("⚠️") ? "⚠️" : "❌"}
-            </span>
             <div className="flex-1 whitespace-pre-line">{mensaje}</div>
-            <button onClick={() => setMensaje("")} className="hover:opacity-70 text-lg leading-none">
+            <button
+              onClick={() => setMensaje("")}
+              className="hover:opacity-70 text-lg leading-none"
+            >
               ✕
             </button>
           </div>
         )}
-
         {/* BOTONES DE ACCIÓN */}
         <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
           {/* Botón Enviar Solicitud */}
