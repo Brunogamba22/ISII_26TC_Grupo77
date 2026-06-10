@@ -57,6 +57,7 @@ function validarMotivo(motivo) {
 }
 
 async function crearSolicitudDeCambio(req, res) {
+  let connection;
   try {
     const {
       motivo,
@@ -129,8 +130,12 @@ async function crearSolicitudDeCambio(req, res) {
       });
     }
 
+    // Iniciar transacción (ACID) para inserción y actualización
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+
     // Insertar solicitud con el motivo limpiado
-    await db.query(
+    await connection.query(
       `
       INSERT INTO reemplazo
       (
@@ -157,7 +162,7 @@ async function crearSolicitudDeCambio(req, res) {
     );
 
     // CAMBIAR ESTADO DE LA GUARDIA
-    await db.query(
+    await connection.query(
       `
       UPDATE guardia
       SET estado = 'pendiente'
@@ -165,6 +170,9 @@ async function crearSolicitudDeCambio(req, res) {
       `,
       [id_guardia]
     );
+
+    // Confirmar transacción
+    await connection.commit();
 
     return res.status(201).json({
       mensaje: "Solicitud registrada correctamente",
@@ -175,6 +183,9 @@ async function crearSolicitudDeCambio(req, res) {
     });
 
   } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
     console.error("Error al crear solicitud:", error);
     
     // Manejo de errores específicos de MySQL
@@ -192,9 +203,12 @@ async function crearSolicitudDeCambio(req, res) {
     }
     
     return res.status(500).json({
-      error: "Error interno del servidor",
-      suggestion: "Por favor, intente nuevamente más tarde"
+      error: "Error interno del servidor. Por favor, intente nuevamente más tarde"
     });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 }
 

@@ -207,10 +207,8 @@ async function confirmarAsignacion(req, res) {
 
     connection = await db.getConnection();
 
-    await connection.beginTransaction();
-
     // =====================================================
-    // 1. VALIDAR DUPLICADOS
+    // 1. VALIDAR DUPLICADOS (Sin iniciar transacción)
     // =====================================================
 
     const [existente] = await connection.query(
@@ -224,14 +222,15 @@ async function confirmarAsignacion(req, res) {
     );
 
     if (existente.length > 0) {
-
-      await connection.rollback();
-
+      // Se cancela sin hacer rollback porque no inició transacción
       return res.status(400).json({
         error:
           "Ya existe un cronograma generado para ese mes y año."
       });
     }
+
+    // Iniciamos la transacción SOLO si pasó las validaciones previas
+    await connection.beginTransaction();
 
     // =====================================================
     // 2. CREAR CALENDARIO
