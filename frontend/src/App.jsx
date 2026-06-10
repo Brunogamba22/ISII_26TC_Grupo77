@@ -10,6 +10,7 @@ import VistaEspecialidades from "./Views/admin/pages/VistaEspecialidades";
 import VistaCalendario from "./Views/admin/pages/VistaCalendario";
 import VistaAprobaciones from "./Views/admin/pages/VistaAprobaciones";
 import VistaAsignacionAutomatica from "./Views/admin/pages/VistaAsignacionAutomatica";
+import VistaAsignacionManual from "./Views/admin/pages/VistaAsignacionManual";
 import "./index.css";
 import "./styles/admin.css";
 
@@ -131,6 +132,7 @@ function AppContent() {
             <Route path="calendario" element={<VistaCalendario />} />
             <Route path="aprobaciones" element={<VistaAprobaciones />} />
             <Route path="asignacion" element={<VistaAsignacionAutomatica />} />
+            <Route path="asignacion-manual" element={<VistaAsignacionManual />} />
           </Route>
         </Route>
 
