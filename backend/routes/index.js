@@ -18,6 +18,11 @@ const {
   crearProfesional
 } = require("../controllers/personalController");
 
+const {
+  obtenerEspecialidades,
+  obtenerRoles
+} = require("../controllers/catalogosController");
+
 /**
  * Router principal de la API.
  *
@@ -57,5 +62,13 @@ router.get("/api/personal", obtenerPersonal);
 
 // Crear un nuevo profesional (médico)
 router.post("/api/registro", crearProfesional);
+
+// --- RUTAS DE CATÁLOGOS ---
+
+// Obtener todas las especialidades
+router.get("/api/especialidades", obtenerEspecialidades);
+
+// Obtener todos los roles
+router.get("/api/roles", obtenerRoles);
 
 module.exports = router;
