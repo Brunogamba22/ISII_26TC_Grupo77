@@ -15,7 +15,9 @@ const {
 
 const {
   obtenerPersonal,
-  crearProfesional
+  crearProfesional,
+  editarProfesional,
+  eliminarProfesional
 } = require("../controllers/personalController");
 
 const {
@@ -62,6 +64,12 @@ router.get("/api/personal", obtenerPersonal);
 
 // Crear un nuevo profesional (médico)
 router.post("/api/registro", crearProfesional);
+
+// Editar un profesional existente
+router.put("/api/personal/:id", editarProfesional);
+
+// Eliminar un profesional (baja lógica)
+router.delete("/api/personal/:id", eliminarProfesional);
 
 // --- RUTAS DE CATÁLOGOS ---
 

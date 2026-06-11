@@ -5,11 +5,26 @@ import ModalAgregarProfesional from '../components/ModalAgregarProfesional';
 import { usePersonal } from '../hooks/usePersonal';
 import { useCatalogos } from '../hooks/useCatalogos';
 import { useCrearProfesional } from '../hooks/useCrearProfesional';
+import { useEditarProfesional } from '../hooks/useEditarProfesional';
+import { personalService } from '../services/personalService';
 
 export default function VistaPersonal() {
   const { profesionales, cargandoLista, errorLista, recargar } = usePersonal();
   const { especialidades, roles } = useCatalogos();
-  const { abrirModal, modalProps } = useCrearProfesional({ onSuccess: recargar });
+  const { abrirModal: abrirModalCrear, modalProps: modalPropsCrear } = useCrearProfesional({ onSuccess: recargar });
+  const { abrirModal: abrirModalEditar, modalProps: modalPropsEditar } = useEditarProfesional({ onSuccess: recargar });
+
+  const handleEliminar = async (profesional) => {
+    if (window.confirm(`¿Estás seguro que deseas dar de baja a ${profesional.nombre} ${profesional.apellido}?`)) {
+      try {
+        const { response, data } = await personalService.eliminar(profesional.id_usuario);
+        if (!response.ok) throw new Error(data?.error || 'Error al eliminar');
+        await recargar();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+  };
 
   return (
     <div className="p-6">
@@ -34,11 +49,21 @@ export default function VistaPersonal() {
         profesionales={profesionales}
         cargandoLista={cargandoLista}
         errorLista={errorLista}
-        onAgregar={abrirModal}
+        onAgregar={abrirModalCrear}
+        onEditar={abrirModalEditar}
+        onEliminar={handleEliminar}
       />
 
+      {/* Modal para Crear */}
       <ModalAgregarProfesional
-        {...modalProps}
+        {...modalPropsCrear}
+        especialidades={especialidades}
+        roles={roles}
+      />
+
+      {/* Modal para Editar */}
+      <ModalAgregarProfesional
+        {...modalPropsEditar}
         especialidades={especialidades}
         roles={roles}
       />

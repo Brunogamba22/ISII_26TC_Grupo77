@@ -15,5 +15,20 @@ export const personalService = {
       method: 'POST', 
       body: datosProfesional 
     });
+  },
+
+  // Edita un profesional existente
+  editar: async (id_usuario, datosProfesional) => {
+    return await apiRequest(`/personal/${id_usuario}`, {
+      method: 'PUT',
+      body: datosProfesional
+    });
+  },
+
+  // Elimina un profesional (baja lógica)
+  eliminar: async (id_usuario) => {
+    return await apiRequest(`/personal/${id_usuario}`, {
+      method: 'DELETE'
+    });
   }
 };

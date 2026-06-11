@@ -17,6 +17,7 @@ export default function ModalAgregarProfesional({
   especialidades = [],
   roles = [],
   error = '',
+  isEdit = false,
 }) {
   if (!isOpen) return null;
 
@@ -43,8 +44,12 @@ export default function ModalAgregarProfesional({
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-lg transform transition-all overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div>
-            <h2 className="text-xl font-semibold text-gray-800">Agregar Profesional</h2>
-            <p className="text-sm text-gray-500 mt-1">Complete los datos para dar de alta en el sistema</p>
+            <h2 className="text-xl font-semibold text-gray-800">
+              {isEdit ? 'Editar Profesional' : 'Agregar Profesional'}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {isEdit ? 'Modifique los datos del profesional seleccionado' : 'Complete los datos para dar de alta en el sistema'}
+            </p>
           </div>
           <button
             type="button"
@@ -120,7 +125,9 @@ export default function ModalAgregarProfesional({
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="password" className="block text-xs font-medium text-gray-700">Contraseña inicial</label>
+            <label htmlFor="password" className="block text-xs font-medium text-gray-700">
+              {isEdit ? 'Nueva Contraseña (opcional)' : 'Contraseña inicial'}
+            </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Lock className="w-4 h-4 text-gray-400" />
@@ -128,10 +135,10 @@ export default function ModalAgregarProfesional({
               <input
                 id="password"
                 type="password"
-                value={formData.contrasena}
+                value={formData.contrasena || ''}
                 onChange={handleFieldChange('contrasena')}
                 disabled={isLoading}
-                placeholder="••••••••"
+                placeholder={isEdit ? 'Dejar en blanco para mantener la actual' : '••••••••'}
                 className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all disabled:opacity-50"
               />
             </div>
@@ -205,7 +212,7 @@ export default function ModalAgregarProfesional({
                   <span>Guardando...</span>
                 </>
               ) : (
-                <span>Guardar Profesional</span>
+                <span>{isEdit ? 'Guardar Cambios' : 'Guardar Profesional'}</span>
               )}
             </button>
           </div>
