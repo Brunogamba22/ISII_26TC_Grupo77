@@ -134,41 +134,15 @@ async function crearSolicitudDeCambio(req, res) {
     connection = await db.getConnection();
     await connection.beginTransaction();
 
-    // Insertar solicitud con el motivo limpiado
+    // Procedimiento almacenado requerido por la cátedra.
+    // Mantiene el comportamiento original del sistema.
     await connection.query(
-      `
-      INSERT INTO reemplazo
-      (
-        fecha_solicitud,
-        motivo,
-        estado,
-        id_guardia,
-        solicitante_id
-      )
-      VALUES
-      (
-        NOW(),
-        ?,
-        'pendiente',
-        ?,
-        ?
-      )
-      `,
+      `CALL sp_crear_solicitud_cambio(?, ?, ?)`,
       [
         validacion.cleanedMotivo,  // Usamos el motivo limpiado
         id_guardia,
-        id_usuario,
+        id_usuario
       ]
-    );
-
-    // CAMBIAR ESTADO DE LA GUARDIA
-    await connection.query(
-      `
-      UPDATE guardia
-      SET estado = 'pendiente'
-      WHERE id_guardia = ?
-      `,
-      [id_guardia]
     );
 
     // Confirmar transacción

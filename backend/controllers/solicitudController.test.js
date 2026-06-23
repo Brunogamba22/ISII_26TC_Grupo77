@@ -40,10 +40,8 @@ describe('QA Testing - Solicitud de Cambio de Guardia (solicitudController)', ()
     db.query.mockResolvedValueOnce([[]]); 
     // 2. Mock: La guardia existe, es del usuario y está 'asignada'
     db.query.mockResolvedValueOnce([[{ id_guardia: 12, estado: 'asignada' }]]);
-    // 3. Mock: INSERT en tabla reemplazo
-    mockConnection.query.mockResolvedValueOnce([{ insertId: 100 }]);
-    // 4. Mock: UPDATE estado en tabla guardia
-    mockConnection.query.mockResolvedValueOnce([{ affectedRows: 1 }]);
+    // 3. Mock: CALL sp_crear_solicitud_cambio(?, ?, ?)
+    mockConnection.query.mockResolvedValueOnce([[]]);
 
     const payload = {
       motivo: "Problema de salud urgente documentado",
@@ -56,7 +54,7 @@ describe('QA Testing - Solicitud de Cambio de Guardia (solicitudController)', ()
     expect(res.status).toBe(201);
     expect(res.body.mensaje).toBe("Solicitud registrada correctamente");
     expect(db.query).toHaveBeenCalledTimes(2);
-    expect(mockConnection.query).toHaveBeenCalledTimes(2);
+    expect(mockConnection.query).toHaveBeenCalledTimes(1);
     expect(mockConnection.beginTransaction).toHaveBeenCalledTimes(1);
     expect(mockConnection.commit).toHaveBeenCalledTimes(1);
     expect(mockConnection.rollback).not.toHaveBeenCalled();

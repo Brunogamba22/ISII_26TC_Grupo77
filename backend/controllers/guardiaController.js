@@ -10,25 +10,13 @@ async function consultarGuardiasAsignadas(req, res) {
   try {
     const { id_usuario } = req.params;
 
-    const [guardias] = await db.query(
-      `
-      SELECT 
-        g.id_guardia,
-        g.fecha,
-        g.hora_inicio,
-        g.hora_fin,
-        g.estado,
-        r.motivo  --  INCLUIMOS EL MOTIVO DESDE LA TABLA reemplazo
-      FROM guardia g
-      LEFT JOIN reemplazo r 
-        ON g.id_guardia = r.id_guardia 
-        AND r.estado = 'pendiente'  -- Solo trae el motivo si hay solicitud pendiente
-      WHERE g.id_usuario = ?
-      AND g.estado IN ('asignada','pendiente')
-      ORDER BY g.fecha ASC
-      `,
+    // Procedimiento almacenado requerido por la cátedra.
+    // Mantiene el comportamiento original del sistema.
+    const [resultSets] = await db.query(
+      `CALL sp_consultar_guardias_asignadas(?)`,
       [id_usuario]
     );
+    const guardias = resultSets[0];
 
     if (guardias.length === 0) {
       return res.status(404).json({
